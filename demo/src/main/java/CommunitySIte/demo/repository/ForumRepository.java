@@ -30,7 +30,7 @@ public class ForumRepository {
     }
 
     public void delete(Long id) {
-        em.createQuery("delete from Forum f where f.id = :id", Forum.class)
+        em.createQuery("delete from Forum f where f.id = :id")
                 .setParameter("id", id)
                 .executeUpdate();
     }

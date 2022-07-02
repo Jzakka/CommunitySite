@@ -1,7 +1,5 @@
 package CommunitySIte.demo.domain;
 
-import CommunitySIte.demo.repository.dto.CommentDto;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,10 +13,10 @@ public class Comment {
 
     @Id
     @GeneratedValue
-    @Column(name = "COMMNET_ID")
+    @Column(name = "COMMENT_ID")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "POST_ID")
     private Post post;
 
@@ -29,8 +27,17 @@ public class Comment {
     private String content;
     private LocalDateTime lastModifiedDate;
 
-    public void update(CommentDto commentDto) {
-        setContent(commentDto.getContent());
+    public void update(String content) {
+        setContent(content);
         setLastModifiedDate(LocalDateTime.now());
+    }
+
+    public static Comment createComment(Users user, Post post, String content) {
+        Comment comment = new Comment();
+        comment.setUser(user);
+        comment.setPost(post);
+        comment.setContent(content);
+        comment.setLastModifiedDate(LocalDateTime.now());
+        return comment;
     }
 }

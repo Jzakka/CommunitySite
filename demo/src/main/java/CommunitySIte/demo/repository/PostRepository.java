@@ -1,13 +1,13 @@
 package CommunitySIte.demo.repository;
 
 import CommunitySIte.demo.domain.Post;
-import CommunitySIte.demo.repository.dto.PostDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -22,8 +22,23 @@ public class PostRepository {
     }
 
     public Post findOne(Long id) {
-        Post findPost = em.find(Post.class, id);
-        return findPost;
+        return em.find(Post.class, id);
+    }
+
+    public List<Post> findByTitle(String title) {
+        return em.createQuery("select p from Post p where p.title = :title", Post.class)
+                .setParameter("title", title)
+                .getResultList();
+    }
+
+    public List<Post> findByPattern(String pattern) {
+        return em.createQuery(
+                "select p " +
+                        "from Post p " +
+                        "where upper(p.title)  like upper(:pattern)" +
+                        "or upper(p.content) like upper(:pattern) ", Post.class)
+                .setParameter("pattern", "%"+pattern+"%")
+                .getResultList();
     }
 
     public List<Post> findAll() {
@@ -31,12 +46,12 @@ public class PostRepository {
         return resultList;
     }
 
-    public void update(Long id, PostDto updateInfo) {
+    public void update(Long id, String title, String content) {
         Post findPost = findOne(id);
-        findPost.update(updateInfo);}
+        findPost.update(title, content);}
 
     public void delete(Long id) {
-        em.createQuery("delete from Post p where p.id = :id", Post.class)
+        em.createQuery("delete from Post p where p.id = :id")
                 .setParameter("id", id)
                 .executeUpdate();
     }

@@ -1,10 +1,9 @@
 package CommunitySIte.demo.domain;
 
-import CommunitySIte.demo.repository.dto.UserDto;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Table(name = "USER")
 @NoArgsConstructor
 public class Users {
 
@@ -25,7 +23,7 @@ public class Users {
     private String password;
 
     @Enumerated(value = EnumType.STRING)
-    private UserType userType;
+    private UserType userType = UserType.MEMBER;
 
     @OneToMany(mappedBy = "user")
     private List<ForumManager> forum = new ArrayList<>();
@@ -33,11 +31,16 @@ public class Users {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> posts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
 
-    public void update(UserDto userDto) {
-        setUserName(userDto.getUserName());
-        setPassword(userDto.getPassWord());
+    public Users(String userName, String password) {
+        this.userName = userName;
+        this.password = password;
+    }
+
+    public void update(String userName, String password) {
+        setUserName(userName);
+        setPassword(password);
     }
 }

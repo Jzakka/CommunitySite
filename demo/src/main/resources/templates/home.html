@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+<h2><a th:href >CommunitySite</a></h2>
+<div>
+    <form role="form" action="/users/login" method="post">
+        <label>이름</label>
+        <input type="text">
+        <label>비밀번호</label>
+        <input type="password">
+        <button type="submit">로그인</button>
+    </form>
+    <a href="/users/new">회원가입</a>
+</div>
+<h3>Forum List</h3>
+<div>
+    <ul th:each="forum :${forums}">
+        <li><a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.getForumName()}">></a> </li>
+    </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${forum.getForumName()}">Title</title>
+</head>
+<body>
+<h2><a href = "/">CommunitySite</a></h2>
+<h3><a th:href th:text="${forum.getForumName()}"></a></h3>
+<div>
+    <form th:action="@{/posts/new/{id}(id=${forum.getId()})}" method="post">
+        <div>
+            <label>제목</label>
+            <input type="text" name="title">
+        </div>
+        <div>
+            <label>작성자</label>
+            <input type="text" name="username">
+        </div>
+        <div>
+            <label>내용</label>
+            <input type="text" name="content">
+        </div>
+        <button type="submit">올리기</button>
+    </form>
+</div>
+    <div th:each="post:${posts}">
+       <div>
+           <div th:text="'Title :' + ${post.getTitle()}"></div>
+           <div th:text="'Writer:' + ${post.getUser().getUserName()}"></div>
+           <div th:text="'Date  :' + ${post.getLastModifiedDate()}"></div>
+           <div th:text="'>>>' + ${post.getContent()}"></div>
+           <form th:action="@{/comments/new}" method="post">
+
+           </form>
+       </div>
+    </div>
+</body>
+</html>

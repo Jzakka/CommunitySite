@@ -1,8 +1,8 @@
 package CommunitySIte.demo.domain;
 
-import CommunitySIte.demo.repository.dto.PostDto;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -10,9 +10,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static javax.persistence.CascadeType.ALL;
+
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
 
     @Id
@@ -39,15 +42,14 @@ public class Post {
     private int good;
     private int bad;
 
-    @OneToMany(mappedBy = "post")
-    private List<Comment> comments=new ArrayList<>();
+    @OneToMany(mappedBy = "post",  cascade = ALL)
+    private List<Comment> comments = new ArrayList<>();
+
     private String image_id;
 
-    public void update(PostDto postDto) {
-        setTitle(postDto.getTitle());
-        setTitle(postDto.getContent());
-        setGood(postDto.getGood());
-        setBad(postDto.getBad());
+    public void update(String title, String content) {
+        setTitle(title);
+        setContent(content);
         setLastModifiedDate(LocalDateTime.now());
     }
 
@@ -57,5 +59,31 @@ public class Post {
 
     public void increaseBad() {
         bad++;
+    }
+
+    public void increaseViews() {
+        views++;
+    }
+
+    public static Post createPost(Users user, Forum forum, Category category, String title, String content) {
+        Post post = new Post();
+        post.setUser(user);
+        post.setForum(forum);
+        post.setCategory(category);
+        post.setTitle(title);
+        post.setContent(content);
+        post.setLastModifiedDate(LocalDateTime.now());
+        return post;
+    }
+
+    public static Post createPost(Users user, Forum forum, String title, String content) {
+        Post post = new Post();
+        post.setUser(user);
+        post.setForum(forum);
+        post.setCategory(forum.getCategories().get(0));
+        post.setTitle(title);
+        post.setContent(content);
+        post.setLastModifiedDate(LocalDateTime.now());
+        return post;
     }
 }

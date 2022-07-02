@@ -1,7 +1,6 @@
 package CommunitySIte.demo.repository;
 
 import CommunitySIte.demo.domain.Users;
-import CommunitySIte.demo.repository.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -16,8 +15,7 @@ public class UserRepository {
 
     public Long save(Users user) {
         em.persist(user);
-        Long id = user.getId();
-        return id;
+        return user.getId();
     }
 
     public Users findOne(Long id) {
@@ -25,18 +23,23 @@ public class UserRepository {
         return findUser;
     }
 
+    public List<Users> findByName(String name) {
+        return em.createQuery("select u from Users u where u.userName = :name", Users.class)
+                .setParameter("name", name).getResultList();
+    }
+
     public List<Users> findAll() {
         List<Users> resultList = em.createQuery("select u from Users u", Users.class).getResultList();
         return resultList;
     }
 
-    public void updateUser(Long id, UserDto updateInfo) {
+    public void updateUser(Long id, String name, String password) {
         Users findUser = findOne(id);
-        findUser.update(updateInfo);
+        findUser.update(name, password);
     }
 
     public void deleteUser(Long id) {
-        em.createQuery("delete from Users u where u.id = :id",Users.class).
+        em.createQuery("delete from Users u where u.id = :id").
                 setParameter("id", id)
                 .executeUpdate();
     }

@@ -1,7 +1,7 @@
 package CommunitySIte.demo.repository;
 
 import CommunitySIte.demo.domain.Comment;
-import CommunitySIte.demo.repository.dto.CommentDto;
+import CommunitySIte.demo.domain.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -30,13 +30,20 @@ public class CommentRepository {
         return resultList;
     }
 
-    public void update(Long id, CommentDto updateInfo) {
+    public List<Comment> findByUser(Users user) {
+        List<Comment> resultList = em.createQuery("select c from Comment c where c.user = :user", Comment.class)
+                .setParameter("user", user).getResultList();
+        return resultList;
+    }
+
+    public void update(Long id, String content) {
         Comment findComment = em.find(Comment.class, id);
-        findComment.update(updateInfo);
+        findComment.update(content);
     }
 
     public void delete(Long id) {
-        em.createQuery("delete from Comment c where c.id = :id", Comment.class)
-                .setParameter("id", id);
+        em.createQuery("delete from Comment c where c.id = :id")
+                .setParameter("id", id)
+                .executeUpdate();
     }
 }

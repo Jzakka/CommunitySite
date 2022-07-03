@@ -2,6 +2,7 @@ package CommunitySIte.demo.service;
 
 import CommunitySIte.demo.domain.Comment;
 import CommunitySIte.demo.domain.Post;
+import CommunitySIte.demo.domain.UserType;
 import CommunitySIte.demo.domain.Users;
 import CommunitySIte.demo.repository.CommentRepository;
 import CommunitySIte.demo.repository.PostRepository;
@@ -26,10 +27,26 @@ public class CommentService {
     public Long writeComment(Long userId, Long postId, String content) {
         Users user = userRepository.findOne(userId);
         Post post = postRepository.findOne(postId);
-
         Comment comment = createComment(user, post, content);
         Long id = commentRepository.save(comment);
         return id;
+    }
+
+    @Transactional
+    public Long writeComment(String username, Long postId, String content) {
+        Users anonymousUser = createAnonymousUser(username);
+        Post post = postRepository.findOne(postId);
+        Comment comment = createComment(anonymousUser, post, content);
+        Long id = commentRepository.save(comment);
+        return id;
+    }
+
+    private Users createAnonymousUser(String username) {
+        Users anonymousUser = new Users();
+        anonymousUser.setUserType(UserType.NONMEMBER);
+        anonymousUser.setUserName(username);
+        userRepository.save(anonymousUser);
+        return anonymousUser;
     }
 
     public Comment findComment(Long id) {

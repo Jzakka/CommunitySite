@@ -1,6 +1,7 @@
 package CommunitySIte.demo.service;
 
 import CommunitySIte.demo.domain.*;
+import CommunitySIte.demo.repository.CategoryRepository;
 import CommunitySIte.demo.repository.ForumRepository;
 import CommunitySIte.demo.repository.PostRepository;
 import CommunitySIte.demo.repository.UserRepository;
@@ -21,9 +22,12 @@ public class PostService {
     private final ForumRepository forumRepository;
     private final PostRepository postRepository;
 
-    public Long feedPost(Long userId, Long forumId, String title, Category category, String content) {
+    private final CategoryRepository categoryRepository;
+
+    public Long feedPost(Long userId, Long forumId, String title, Long categoryId, String content) {
         Users user = userRepository.findOne(userId);
         Forum forum = forumRepository.findOne(forumId);
+        Category category = categoryRepository.findOne(categoryId);
         Post post = createPost(user, forum, category, title, content);
         postRepository.save(post);
         return post.getId();
@@ -41,6 +45,15 @@ public class PostService {
         Users user = createAnonymousUser(username);
         Forum forum = forumRepository.findOne(forumId);
         Post post = createPost(user, forum, title, content);
+        postRepository.save(post);
+        return post.getId();
+    }
+
+    public Long feedPost(Long forumId, String username, Long categoryId, String title, String content) {
+        Users user = createAnonymousUser(username);
+        Forum forum = forumRepository.findOne(forumId);
+        Category category = categoryRepository.findOne(categoryId);
+        Post post = createPost(user, forum, category, title, content);
         postRepository.save(post);
         return post.getId();
     }

@@ -23,7 +23,7 @@ public class Post {
     @Column(name = "POST_ID")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CATEGORY_ID")
     private Category category;
 

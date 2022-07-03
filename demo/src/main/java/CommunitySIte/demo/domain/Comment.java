@@ -40,4 +40,13 @@ public class Comment {
         comment.setLastModifiedDate(LocalDateTime.now());
         return comment;
     }
+
+    //유동 사용자 처리 필요
+    public static Comment createComment(String  username, Post post, String content) {
+        Comment comment = new Comment();
+        comment.setPost(post);
+        comment.setContent(content);
+        comment.setLastModifiedDate(LocalDateTime.now());
+        return comment;
+    }
 }

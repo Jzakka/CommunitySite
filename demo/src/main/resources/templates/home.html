@@ -19,7 +19,7 @@
 <h3>Forum List</h3>
 <div>
     <ul th:each="forum :${forums}">
-        <li><a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.getForumName()}">></a> </li>
+        <li><a th:href="@{/forum/{id}(id=${forum.id})}" th:text="${forum.getForumName()}">></a> </li>
     </ul>
 </div>
 </body>

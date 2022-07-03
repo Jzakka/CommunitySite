@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${post.getTitle()}">Title</title>
+</head>
+<body>
+    <div>
+    <div><span><button type="button"
+                 th:onclick="|location.href='@{/forum/{forumId}/post/{id}/update(id=${postId}, forumId=${forumId})}'|">수정
+    </button></span><span>
+        <form th:action="@{/forum/{forumId}/post/{id}/delete(id=${postId}, forumId=${forumId})}" method="post">
+            <button type="submit">삭제</button>
+        </form></span></div>
+    <div>
+        <div>
+            <p th:text="'Title :' + ${post.getTitle()}"></p>
+        </div>
+        <div th:text="'Writer:' + ${post.getUser().getUserName()}"></div>
+        <div th:text="'Date  :' + ${post.getLastModifiedDate()}"></div>
+        <hr>
+        <div th:text="${post.getContent()}"></div>
+    </div>
+    <hr>
+    <!-- 댓글 영역-->
+    <div th:each="comment:${post.getComments()}">
+        <table>
+            <tr>
+                <td th:text="'>>'+${comment.user.getUserName()}"></td>
+                <td th:text="${comment.lastModifiedDate}"></td>
+            </tr>
+            <tr>
+                <td th:text="${comment.content}"></td>
+            </tr>
+            <tr>
+                <td><a th:href="@{/forum/{forumId}/post/{postId}/comment/{commentId}/delete(forumId=${forumId},
+                        postId=${postId}, commentId=${comment.id})}">댓글삭제</a></td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <form th:action="@{/forum/{forumId}/post/{postId}/comment/new(postId=${postId}, forumId=${forumId})}"
+              th:object="${commentForm}" method="post">
+            <div>
+                <label for="username" th:text="이름"></label>
+                <input type="text" th:field="*{username}">
+            </div>
+            <div>
+                <label for="content" th:text="댓글"></label>
+                <textarea cols="40" rows="5" th:field="*{content}"></textarea>
+                <button type="submit" th:text="댓글등록"></button>
+            </div>
+        </form>
+    </div>
+    </div>
+</body>
+</html>

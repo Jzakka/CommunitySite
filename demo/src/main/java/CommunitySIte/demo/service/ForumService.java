@@ -45,6 +45,12 @@ public class ForumService {
         findForum.addManager(findUser);
     }
 
+    @Transactional(readOnly = true)
+    public List<Category> showCategories(Long id) {
+        Forum forum = forumRepository.findOne(id);
+        return forum.getCategories();
+    }
+
     public void addCategory(Long forumId, String categoryName) {
         Forum forum = forumRepository.findOne(forumId);
         forum.addCategory(new Category(categoryName));

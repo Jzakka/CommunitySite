@@ -1,15 +1,11 @@
 package CommunitySIte.demo.service;
 
 import CommunitySIte.demo.domain.*;
-import CommunitySIte.demo.repository.CategoryRepository;
-import CommunitySIte.demo.repository.ForumRepository;
-import CommunitySIte.demo.repository.PostRepository;
-import CommunitySIte.demo.repository.UserRepository;
+import CommunitySIte.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
 import static CommunitySIte.demo.domain.Post.*;
@@ -21,7 +17,6 @@ public class PostService {
     private final UserRepository userRepository;
     private final ForumRepository forumRepository;
     private final PostRepository postRepository;
-
     private final CategoryRepository categoryRepository;
 
     public Long feedPost(Long userId, Long forumId, String title, Long categoryId, String content) {
@@ -67,8 +62,14 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Post showPost(Long id) {
+    public Post findPost(Long id) {
         return postRepository.findOne(id);
+    }
+
+    public Post showPost(Long id) {
+        Post post = postRepository.findOne(id);
+        post.increaseViews();
+        return post;
     }
 
     @Transactional(readOnly = true)
@@ -91,11 +92,6 @@ public class PostService {
         findPost.increaseBad();
     }
 
-    public void increaseView(Long id) {
-        Post one = postRepository.findOne(id);
-        one.increaseViews();
-    }
-
     public void update(Long id, String title, String content) {
         postRepository.update(id, title, content);
     }
@@ -110,7 +106,6 @@ public class PostService {
     @Transactional(readOnly = true)
     public List<Comment> showComments(Long id) {
         Post post = postRepository.findOne(id);
-        System.out.println("class ==== " + post.getComments().getClass());
         return post.getComments();
     }
 

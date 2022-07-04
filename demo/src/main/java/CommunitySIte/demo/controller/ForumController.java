@@ -9,7 +9,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -25,9 +24,8 @@ public class ForumController {
     public String listForum(@PathVariable("id") Long forumId, Model model) {
         Forum forum = forumService.showForum(forumId);
         List<Post> posts = forumService.showPosts(forumId);
-        model.addAttribute("postForm",new PostController.PostForm());
-        model.addAttribute("forumName", forum.getForumName());
-        model.addAttribute("forumId", forumId);
+        model.addAttribute("postForm",new PostController.PostFeedForm());
+        model.addAttribute("forum", forum);
         model.addAttribute("posts", posts);
         model.addAttribute("categories", forumService.showCategories(forumId));
 

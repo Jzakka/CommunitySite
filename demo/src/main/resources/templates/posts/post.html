@@ -17,7 +17,7 @@
             <p th:text="'Title :' + ${post.getTitle()}"></p>
         </div>
         <div th:text="'Writer:' + ${post.getUser().getUserName()}"></div>
-        <div th:text="'Date  :' + ${post.getLastModifiedDate()}"></div>
+        <div th:text="'Date  :' + ${post.getLastModifiedDate().withNano(0)}"></div>
         <hr>
         <div th:text="${post.getContent()}"></div>
     </div>
@@ -27,7 +27,7 @@
         <table>
             <tr>
                 <td th:text="'>>'+${comment.user.getUserName()}"></td>
-                <td th:text="${comment.lastModifiedDate}"></td>
+                <td th:text="${comment.lastModifiedDate.withNano(0)}"></td>
             </tr>
             <tr>
                 <td th:text="${comment.content}"></td>
@@ -43,12 +43,15 @@
               th:object="${commentForm}" method="post">
             <div>
                 <label for="username" th:text="이름"></label>
-                <input type="text" th:field="*{username}">
+                <input type="text" id="username" th:field="*{username}">
+                <div th:errors="*{username}">이름 기입 오류</div>
             </div>
             <div>
                 <label for="content" th:text="댓글"></label>
                 <textarea cols="40" rows="5" th:field="*{content}"></textarea>
-                <button type="submit" th:text="댓글등록"></button>
+                <div th:errors="*{content}">내용 기입 오류</div>
+
+                <button type="submit" id="content" th:text="댓글등록"></button>
             </div>
         </form>
     </div>

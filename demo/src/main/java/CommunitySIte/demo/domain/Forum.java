@@ -21,14 +21,14 @@ public class Forum {
     private String forumName;
     private ForumType forumType;
 
-    @OneToMany(mappedBy = "forum", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "forum", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumManager> forumManagers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "forum", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "forum", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Category> categories = new ArrayList<>();
 
-    @OneToMany(mappedBy = "forum", cascade = CascadeType.ALL)
-    @OrderBy("lastModifiedDate desc ")
+    @OneToMany(mappedBy = "forum", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id desc ")
     private List<Post> posts = new Stack<>();
 
     public Forum() {

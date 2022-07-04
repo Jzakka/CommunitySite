@@ -7,15 +7,18 @@
 <body>
 <div>
     <form action="post.html" th:action th:object="${postForm}" method="post">
+        <input type="hidden" id="id" name="id" th:value="${postId}">
         <div>
             <label for="title">제목</label>
-            <input type="text" th:field="*{title}">
+            <input id="title" type="text" th:field="*{title}">
+            <div th:errors="*{title}">제목 기입 오류</div>
         </div>
         <div>
             <label for="content">내용</label>
-            <textarea cols="50" rows="10" th:field="*{content}">
+            <textarea id="content" cols="50" rows="10" th:field="*{content}">
 
             </textarea>
+            <div th:errors="*{content}">내용 기입 오류</div>
         </div>
         <button type="submit">수정</button>
     </form>

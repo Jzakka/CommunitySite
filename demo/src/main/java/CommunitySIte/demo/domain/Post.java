@@ -4,6 +4,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -11,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static javax.persistence.CascadeType.ALL;
+import static javax.persistence.CascadeType.REMOVE;
+import static org.hibernate.annotations.CascadeType.*;
 
 @Entity
 @Getter
@@ -42,7 +47,14 @@ public class Post {
     private int good;
     private int bad;
 
-    @OneToMany(mappedBy = "post",  cascade = ALL)
+
+    /**
+     * cascade=REMOVE가 작동안함...
+     * OnDelete는 되는데 왜인지 잘 모르겠음. 일단 이걸로 설정
+     */
+    @OneToMany(mappedBy = "post", orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OrderBy("id desc")
     private List<Comment> comments = new ArrayList<>();
 
     private String image_id;

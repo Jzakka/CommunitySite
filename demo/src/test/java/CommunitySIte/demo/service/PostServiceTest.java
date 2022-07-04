@@ -4,18 +4,14 @@ import CommunitySIte.demo.domain.Comment;
 import CommunitySIte.demo.domain.Forum;
 import CommunitySIte.demo.domain.Post;
 import CommunitySIte.demo.domain.Users;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class PostServiceTest {
@@ -42,8 +38,8 @@ class PostServiceTest {
         Long id1 = postService.feedPost(user.getId(), forum.getId(), "title", "contents");
         Long id2 = postService.feedPost(user.getId(), forum.getId(), "title2", forum.getCategories().get(0), "contents");
 
-        Post post1 = postService.showPost(id1);
-        Post post2 = postService.showPost(id2);
+        Post post1 = postService.findPost(id1);
+        Post post2 = postService.findPost(id2);
 
         assertThat(post1.getTitle()).isEqualTo("title");
         assertThat(post2.getTitle()).isEqualTo("title2");
@@ -75,7 +71,7 @@ class PostServiceTest {
         Long id = postService.feedPost(user.getId(), forum.getId(), "title", "contents");
         postService.update(id, "changedTitle", "changedContents");
 
-        Post post = postService.showPost(id);
+        Post post = postService.findPost(id);
         assertThat(post.getTitle()).isEqualTo("changedTitle");
     }
 

@@ -1,4 +1,4 @@
-package CommunitySIte.demo.controller;
+package CommunitySIte.demo.web.controller;
 
 import CommunitySIte.demo.domain.Forum;
 import CommunitySIte.demo.domain.Post;
@@ -30,24 +30,5 @@ public class ForumController {
         model.addAttribute("categories", forumService.showCategories(forumId));
 
         return "/forums/forum";
-    }
-
-    @PostConstruct
-    public void init(){
-        Forum forum = new Forum();
-        forum.setForumName("forum1");
-        Forum forum2 = new Forum();
-        forum2.setForumName("forum2");
-        Forum forum3 = new Forum();
-        forum3.setForumName("forum3");
-        Forum forum4 = new Forum();
-        forum4.setForumName("forum4");
-        Forum forum5 = new Forum();
-        forum5.setForumName("forum5");
-        forumService.openForum(forum);
-        forumService.openForum(forum2);
-        forumService.openForum(forum3);
-        forumService.openForum(forum4);
-        forumService.openForum(forum5);
     }
 }

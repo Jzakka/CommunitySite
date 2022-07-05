@@ -1,4 +1,4 @@
-package CommunitySIte.demo.controller;
+package CommunitySIte.demo.web.controller;
 
 import CommunitySIte.demo.domain.Post;
 import CommunitySIte.demo.service.CommentService;

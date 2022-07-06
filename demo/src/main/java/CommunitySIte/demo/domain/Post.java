@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -12,10 +11,6 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import static javax.persistence.CascadeType.ALL;
-import static javax.persistence.CascadeType.REMOVE;
-import static org.hibernate.annotations.CascadeType.*;
 
 @Entity
 @Getter
@@ -40,8 +35,13 @@ public class Post {
     @JoinColumn(name = "FORUM_ID")
     private Forum forum;
 
+    @Enumerated(EnumType.STRING)
+    private PostType postType;
+
     private String title;
     private String content;
+    private String anonymousUserName;
+    private String password;
     private int views;
     private LocalDateTime lastModifiedDate;
     private int good;
@@ -59,6 +59,31 @@ public class Post {
 
     private String image_id;
 
+    public static Post createPost(Forum forum, String title, Category category, String anonymousUsername, String password, String content) {
+        Post post = new Post();
+        post.setForum(forum);
+        post.setTitle(title);
+        post.setCategory(category);
+        post.setPostType(PostType.ANONYMOUS);
+        post.setAnonymousUserName(anonymousUsername);
+        post.setPassword(password);
+        post.setContent(content);
+        post.setLastModifiedDate(LocalDateTime.now());
+        return post;
+    }
+
+    public static Post createPost(Forum forum, String title, Users user, Category category, String content) {
+        Post post = new Post();
+        post.setForum(forum);
+        post.setPostType(PostType.NORMAL);
+        post.setTitle(title);
+        post.setUser(user);
+        post.setCategory(category);
+        post.setContent(content);
+        post.setLastModifiedDate(LocalDateTime.now());
+        return post;
+    }
+
     public void update(String title, String content) {
         setTitle(title);
         setContent(content);
@@ -75,27 +100,5 @@ public class Post {
 
     public void increaseViews() {
         views++;
-    }
-
-    public static Post createPost(Users user, Forum forum, Category category, String title, String content) {
-        Post post = new Post();
-        post.setUser(user);
-        post.setForum(forum);
-        post.setCategory(category);
-        post.setTitle(title);
-        post.setContent(content);
-        post.setLastModifiedDate(LocalDateTime.now());
-        return post;
-    }
-
-    public static Post createPost(Users user, Forum forum, String title, String content) {
-        Post post = new Post();
-        post.setUser(user);
-        post.setForum(forum);
-        post.setCategory(forum.getCategories().get(0));
-        post.setTitle(title);
-        post.setContent(content);
-        post.setLastModifiedDate(LocalDateTime.now());
-        return post;
     }
 }

@@ -2,11 +2,11 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${forumName}">Title</title>
+    <title th:text="${forum.forumName}">Title</title>
 </head>
 <body>
 <h2><a href = "/">CommunitySite</a></h2>
-<h3><a th:href th:text="${forumName}"></a></h3>
+<h3><a th:href th:text="${forum.forumName}"></a></h3>
 
 <div>
     <a th:href="@{/forum/{forumId}/category/new(forumId=${forum.id})}">카테고리 생성</a>
@@ -28,12 +28,16 @@
             <input type="text" id="title" th:field="*{title}">
             <div th:errors="*{title}">제목 기입 오류</div>
         </div>
-        <div>
+        <div th:if="${user==null}">
             <label for="username">작성자</label>
             <input type="text" id="username" th:field="*{username}">
             <div th:errors="*{username}">작성자 이름 기입 오류</div>
         </div>
-
+        <div th:if="${user==null}">
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" th:field="*{password}">
+            <div th:errors="*{password}">비밀번호 기입오류</div>
+        </div>
         <!--select box 방식 -->
         <div>
             <select th:field="*{categoryId}">
@@ -56,15 +60,13 @@
     </form>
 </div>
     <div th:each="post:${posts}">
-       <div>
-           <div>
-               <a th:href="@{/forum/{forumId}/post/{postId}(postId=${post.id}, forumId=${forum.id})}"
-                  th:text="'Title :' + ${post.getTitle()}"></a>
-           </div>
-           <div th:text="'Writer:' + ${post.getUser().getUserName()}"></div>
-           <div th:text="'Date  :' + ${post.getLastModifiedDate().withNano(0)}"></div>
-           <div th:text="'>>>' + ${post.getContent()}"></div>
-       </div>
+        <div>
+            <a th:href="@{/forum/{forumId}/post/{postId}(postId=${post.id}, forumId=${forum.id})}"
+               th:text="'Title :' + ${post.title}"></a>
+        </div>
+        <div th:text="'Writer:' + ${(post.postType!=postType[0])?post.anonymousUserName:post.user.userName}"></div>
+        <div th:text="'Date  :' + ${post.lastModifiedDate.withNano(0)}"></div>
+        <div th:text="'>>>' + ${post.content}"></div>
     </div>
 </body>
 </html>

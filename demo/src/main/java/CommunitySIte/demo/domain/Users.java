@@ -8,6 +8,7 @@ import org.hibernate.annotations.ColumnDefault;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -44,5 +45,18 @@ public class Users {
     public void update(String userName, String password) {
         setUserName(userName);
         setPassword(password);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Users users = (Users) o;
+        return Objects.equals(getId(), users.getId()) && Objects.equals(getLoginId(), users.getLoginId()) && Objects.equals(getUserName(), users.getUserName()) && Objects.equals(getPassword(), users.getPassword()) && getUserType() == users.getUserType();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getLoginId(), getUserName(), getPassword(), getUserType());
     }
 }

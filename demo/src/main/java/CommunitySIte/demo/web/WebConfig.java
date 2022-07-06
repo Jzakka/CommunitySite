@@ -3,6 +3,7 @@ package CommunitySIte.demo.web;
 import CommunitySIte.demo.web.argumentresolver.LoginUserArgumentResolver;
 import CommunitySIte.demo.web.interceptor.LogInterceptor;
 import CommunitySIte.demo.web.interceptor.LoginCheckInterceptor;
+import CommunitySIte.demo.web.interceptor.UserTypeInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -31,5 +32,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/", "/forum/{forumId}","/forum/{forumId}/category/**",
                         "/forum/{forumId}/post/**","/users/new","/login",
                         "/logout","/css/**", "/*.ico","/error");
+
+        registry.addInterceptor(new UserTypeInterceptor())
+                .order(3)
+                .addPathPatterns("/forum/{forumId}/category/new");
     }
 }

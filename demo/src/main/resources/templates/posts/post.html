@@ -5,18 +5,21 @@
     <title th:text="${post.getTitle()}">Title</title>
 </head>
 <body>
+    <h2><a href = "/">CommunitySite</a></h2>
+    <h3><a th:href = "@{/forum/{forumId}(forumId=${forumId})}" th:text="${forumName}"></a></h3>
     <div>
-    <div><span><button type="button"
+    <div th:if="${(post.user==null || post.user.equals(user))}"><span><button type="button"
                  th:onclick="|location.href='@{/forum/{forumId}/post/{id}/update(id=${postId}, forumId=${forumId})}'|">수정
     </button></span><span>
-        <form th:action="@{/forum/{forumId}/post/{id}/delete(id=${postId}, forumId=${forumId})}" method="post">
-            <button type="submit">삭제</button>
-        </form></span></div>
+        <button th:onclick="|location.href='@{/forum/{forumId}/post/{postId}/delete(forumId=${forumId}, postId=${postId})}'|"
+                method="get">
+            삭제
+        </button></span></div>
     <div>
         <div>
             <p th:text="'Title :' + ${post.getTitle()}"></p>
         </div>
-        <div th:text="'Writer:' + ${post.getUser().getUserName()}"></div>
+        <div th:text="'Writer:' + ${(post.postType!=postType[0])?post.anonymousUserName:post.user.userName}"></div>
         <div th:text="'Date  :' + ${post.getLastModifiedDate().withNano(0)}"></div>
         <hr>
         <div th:text="${post.getContent()}"></div>
@@ -26,7 +29,7 @@
     <div th:each="comment:${post.getComments()}">
         <table>
             <tr>
-                <td th:text="'>>'+${comment.user.getUserName()}"></td>
+                <td th:text="'>>'+${(comment.postType!=postType[0])?comment.anonymousUserName:comment.user.userName}"></td>
                 <td th:text="${comment.lastModifiedDate.withNano(0)}"></td>
             </tr>
             <tr>
@@ -38,13 +41,21 @@
             </tr>
         </table>
     </div>
+        <!--댓글 입력 부분-->
     <div>
         <form th:action="@{/forum/{forumId}/post/{postId}/comment/new(postId=${postId}, forumId=${forumId})}"
               th:object="${commentForm}" method="post">
-            <div>
-                <label for="username" th:text="이름"></label>
-                <input type="text" id="username" th:field="*{username}">
-                <div th:errors="*{username}">이름 기입 오류</div>
+            <div th:if="${user==null}">
+                <div>
+                    <label for="username">작성자</label>
+                    <input type="text" id="username" th:field="*{username}">
+                    <div th:errors="*{username}">작성자 이름 기입 오류</div>
+                </div>
+                <div>
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" th:field="*{password}">
+                    <div th:errors="*{password}">비밀번호 기입오류</div>
+                </div>
             </div>
             <div>
                 <label for="content" th:text="댓글"></label>

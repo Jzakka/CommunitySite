@@ -19,38 +19,19 @@ public class PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
 
-    public Long feedPost(Long userId, Long forumId, String title, Long categoryId, String content) {
-        Users user = userRepository.findOne(userId);
+    public void feedPost(Long forumId, String title,  String anonymousUsername, Long categoryId,
+                         String password, String content ) {
         Forum forum = forumRepository.findOne(forumId);
         Category category = categoryRepository.findOne(categoryId);
-        Post post = createPost(user, forum, category, title, content);
+        Post post = Post.createPost(forum, title,category, anonymousUsername, password, content);
         postRepository.save(post);
-        return post.getId();
     }
 
-    public Long feedPost(Long userId, Long forumId, String title, String content) {
-        Users user = userRepository.findOne(userId);
-        Forum forum = forumRepository.findOne(forumId);
-        Post post = createPost(user, forum, title, content);
-        postRepository.save(post);
-        return post.getId();
-    }
-
-    public Long feedPost(Long forumId, String username, String title, String content) {
-        Users user = createAnonymousUser(username);
-        Forum forum = forumRepository.findOne(forumId);
-        Post post = createPost(user, forum, title, content);
-        postRepository.save(post);
-        return post.getId();
-    }
-
-    public Long feedPost(Long forumId, String username, Long categoryId, String title, String content) {
-        Users user = createAnonymousUser(username);
+    public void feedPost(Long forumId, String title, Users user, Long categoryId, String content) {
         Forum forum = forumRepository.findOne(forumId);
         Category category = categoryRepository.findOne(categoryId);
-        Post post = createPost(user, forum, category, title, content);
+        Post post = Post.createPost(forum, title, user, category, content);
         postRepository.save(post);
-        return post.getId();
     }
 
     private Users createAnonymousUser(String username) {

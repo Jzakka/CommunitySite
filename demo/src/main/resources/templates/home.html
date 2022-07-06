@@ -18,6 +18,9 @@
 </div>
 <div th:if="${user != null}">
     <p th:text="|${user.userName} 님 안녕하세요!|"></p>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">로그아웃</button>
+    </form>
 </div>
 <h3>Forum List</h3>
 <div>

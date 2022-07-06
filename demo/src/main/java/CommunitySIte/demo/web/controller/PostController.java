@@ -2,8 +2,11 @@ package CommunitySIte.demo.web.controller;
 
 import CommunitySIte.demo.domain.Forum;
 import CommunitySIte.demo.domain.Post;
+import CommunitySIte.demo.domain.PostType;
+import CommunitySIte.demo.domain.Users;
 import CommunitySIte.demo.service.ForumService;
 import CommunitySIte.demo.service.PostService;
+import CommunitySIte.demo.web.argumentresolver.Login;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,10 +14,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -33,11 +39,39 @@ public class PostController {
         return forumId;
     }
 
+    @ModelAttribute("forumName")
+    public String forumName(@PathVariable Long forumId) {
+        return forumService.showForum(forumId).getForumName();
+    }
+
+    @ModelAttribute("postType")
+    public PostType[] postType() {
+        return PostType.values();
+    }
+
+    @ModelAttribute("user")
+    public Users user(@Login Users loginUser) {
+        return loginUser;
+    }
+
     @PostMapping("/new")
     public String feed(@ModelAttribute("postForm") @Validated PostFeedForm postForm,
                        BindingResult bindingResult,
+                       @Login  Users loginUser,
                        @PathVariable Long forumId,
                        Model model) {
+        //일반 사용자냐 유동이냐에 따라 투고 작성자 이름이 달라야함
+        //일반 사용자
+        //유동 사용자
+        if (loginUser == null) {
+            if(!StringUtils.hasText(postForm.getUsername())){
+                bindingResult.rejectValue("username", "username","비회원 투고는 이름기입이 필수입니다.");
+            }
+            if(!StringUtils.hasText(postForm.getPassword())){
+                bindingResult.rejectValue("password", "password","비회원 투고는 비밀번호기입이 필수입니다.");
+            }
+        }
+
         log.info("postForm = {}", postForm);
         if (bindingResult.hasErrors()) {
             log.info("bindingResult = {}", bindingResult);
@@ -53,35 +87,104 @@ public class PostController {
 
             return "forums/forum";
         }
+        if ((loginUser == null)) {
+            postService.feedPost(postForm.forumId, postForm.title, postForm.username,
+                    postForm.categoryId, postForm.password, postForm.content);
+        } else {
+            postService.feedPost(postForm.forumId, postForm.title, loginUser, postForm.categoryId, postForm.content);
+        }
 
-        postService.feedPost(forumId, postForm.getUsername(), postForm.getCategoryId(),
-                postForm.getTitle(), postForm.getContent());
         return "redirect:/forum/{forumId}";
     }
 
     @PostMapping("/{postId}/update")
     public String update(@PathVariable Long postId,
+                         @Login Users user,
                          @ModelAttribute("postForm") @Validated PostUpdateForm postForm,
                          BindingResult bindingResult){
-        postService.update(postId, postForm.title, postForm.content);
+        Post post = postService.findPost(postId);
+
+        boolean updatable = updatable(user, postForm, bindingResult, post);
+        if (!updatable) {
+            return "redirect:/forum/{forumId}/post/{postId}";
+        }
 
         if (bindingResult.hasErrors()) {
             log.info("bindingResult = {}", bindingResult);
             return "posts/updateForm";
         }
 
+        postService.update(postId, postForm.title, postForm.content);
         return "redirect:/forum/{forumId}/post/{postId}";
     }
 
+    private boolean updatable(Users user, PostUpdateForm postForm, BindingResult bindingResult, Post post) {
+        //유동 글 비밀번호 검증
+        if(post.getPostType()==PostType.ANONYMOUS){
+            if (!postForm.getPassword().isBlank()&&!post.getPassword().equals(postForm.password)) {
+                log.info("updatable : 비밀번호 불일치");
+                bindingResult.rejectValue("password","password","비밀번호가 다릅니다!");
+            }
+        }
+
+        //일반 글 사용자 검증
+        //
+        else{
+            if(!(post.getUser()==null || post.getUser().equals(user))){
+                log.info("updatable : 작성자 불일치");
+                //리다이렉트 말고 오류메시지나 오류창으로 넘어가게 만들기
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @GetMapping("/{postId}/delete")
+    public String enterPasswordOrNot(@PathVariable Long postId,
+                                     @Login Users user,Model model) {
+        Post post = postService.findPost(postId);
+        boolean accessible = accessible(user, post);
+        if (!accessible) {
+            return "redirect:/forum/{forumId}/post/{postId}";
+        }
+
+        if (post.getPostType() == PostType.NORMAL) {
+            postService.delete(postId);
+            return "redirect:/forum/{forumId}";
+        } else {
+            model.addAttribute("password", "");
+            return "posts/enter-password";
+        }
+    }
+
     @PostMapping("/{postId}/delete")
-    public String delete(@PathVariable Long postId) {
+    public String delete(@PathVariable Long postId, @ModelAttribute(name = "password") String password,
+                         BindingResult bindingResult){
+        Post post = postService.findPost(postId);
+
+        if(!StringUtils.hasText(password)||(post.getPassword() != null && !post.getPassword().equals(password))){
+            log.info("post.getPassword()={}", post.getPassword());
+            log.info("password={}", password);
+            bindingResult.reject("password", "비밀번호를 올바르게 입력해주세요");
+        }
+
+        if (bindingResult.hasErrors()) {
+            log.info("bindingResult={}", bindingResult);
+            return "posts/enter-password";
+        }
+
         postService.delete(postId);
         return "redirect:/forum/{forumId}";
     }
 
     @GetMapping("/{postId}")
-    public String post(@PathVariable Long postId, Model model) {
+    public String post(@PathVariable Long postId,
+                       @Login Users user,
+                       Model model) {
         Post post = postService.showPost(postId);
+
+        log.info("loginUser={}", user);
+        log.info("post.user={}", post.getUser());
         post.increaseViews();
         model.addAttribute("post", post);
         model.addAttribute("commentForm", new CommentController.CommentForm());
@@ -90,12 +193,43 @@ public class PostController {
     }
 
     @GetMapping("/{postId}/update")
-    public String updatePostForm(@PathVariable Long postId, Model model) {
+    public String updatePostForm(@PathVariable Long postId,
+                                 @Login Users user,
+                                 Model model) {
         Post post = postService.findPost(postId);
+
+        boolean accessible = accessible(user, post);
+        if (!accessible) {
+            return "redirect:/forum/{forumId}/post/{postId}";
+        }
+
         model.addAttribute("postId", postId);
-        model.addAttribute("postForm", new PostFeedForm(post));
+        model.addAttribute("postForm", new PostUpdateForm(post));
 
         return "posts/updateForm";
+    }
+
+    private boolean accessible(Users user, Post post) {
+        //로그인한 사용자가 유동글 지우려려하면 리다이렉트
+        if(post.getPostType()==PostType.ANONYMOUS && user !=null){
+            log.info("accessible : 로그인 사용자가 글 수정접근");
+            return false;
+        }
+        //유동이 일반 글 지우려하면 리다이렉트
+        else if(post.getPostType()==PostType.NORMAL && user ==null ){
+            log.info("accessible : 비로그인 사용자가 글 수정접근");
+            return false;
+        }
+        //타임리프에서 이미 검증하지만 서버쪽에서도 이중 검증
+        //일반 사용자가 자기글 아닌거 지우려 하면 리다이렉트
+        else{
+            if(!(post.getUser()==null || post.getUser().equals(user))){
+                log.info("accessible : 작성자 불일치");
+                //리다이렉트 말고 오류메시지나 오류창으로 넘어가게 만들기
+                return false;
+            }
+        }
+        return true;
     }
 
 
@@ -105,17 +239,12 @@ public class PostController {
     public static class PostFeedForm {
         @NotBlank(message = "제목을 입력하세요.")
         private String title;
-        @NotBlank(message = "이름 입력은 필수입니다.")
         private String username;
+        private String password;
         @NotBlank(message = "내용을 입력하세요.")
         private String content;
         private Long categoryId;
         private Long forumId;
-
-        public PostFeedForm(Post post) {
-            title = post.getTitle();
-            content = post.getContent();
-        }
     }
 
     //에러메시지 파일이 yml로 설정이 안된다는듯...
@@ -130,12 +259,16 @@ public class PostController {
         private Long id;
         @NotBlank(message = "제목을 입력하세요.")
         private String title;
-
-        private String username;
+        private PostType postType;
+        @NotBlank(message = "비밀번호를 입력하세요")
+        private String password;
         @NotBlank(message = "내용을 입력하세요")
         private String content;
 
-        private Long categoryId;
-        private Long forumId;
+        public PostUpdateForm(Post post) {
+            setTitle(post.getTitle());
+            setContent(post.getContent());
+            setPostType(post.getPostType());
+        }
     }
 }

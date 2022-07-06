@@ -24,21 +24,17 @@ public class CommentService {
     private final PostRepository postRepository;
 
     @Transactional
-    public Long writeComment(Long userId, Long postId, String content) {
-        Users user = userRepository.findOne(userId);
+    public Long writeComment(Users user, Long postId, String content) {
         Post post = postRepository.findOne(postId);
         Comment comment = createComment(user, post, content);
-        Long id = commentRepository.save(comment);
-        return id;
+        return commentRepository.save(comment);
     }
 
     @Transactional
-    public Long writeComment(String username, Long postId, String content) {
-        Users anonymousUser = createAnonymousUser(username);
+    public Long writeComment(String username, String password, Long postId, String content) {
         Post post = postRepository.findOne(postId);
-        Comment comment = createComment(anonymousUser, post, content);
-        Long id = commentRepository.save(comment);
-        return id;
+        Comment comment = createComment(username, password, post, content);
+        return commentRepository.save(comment);
     }
 
     private Users createAnonymousUser(String username) {

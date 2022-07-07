@@ -4,6 +4,7 @@ import CommunitySIte.demo.domain.Forum;
 import CommunitySIte.demo.domain.Post;
 import CommunitySIte.demo.domain.PostType;
 import CommunitySIte.demo.domain.Users;
+import CommunitySIte.demo.exception.NotAuthorizedException;
 import CommunitySIte.demo.service.ForumService;
 import CommunitySIte.demo.service.PostService;
 import CommunitySIte.demo.web.argumentresolver.Login;
@@ -20,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -103,7 +105,11 @@ public class PostController {
                          @ModelAttribute("postForm") @Validated PostUpdateForm postForm,
                          BindingResult bindingResult){
         Post post = postService.findPost(postId);
-
+        boolean accessible = accessible(user, post);
+        if (!accessible) {
+            //return "redirect:/forum/{forumId}/post/{postId}";
+            throw new NotAuthorizedException("인증되지 않은 사용자 접근입니다.");
+        }
         boolean updatable = updatable(user, postForm, bindingResult, post);
         if (!updatable) {
             return "redirect:/forum/{forumId}/post/{postId}";
@@ -121,7 +127,11 @@ public class PostController {
     private boolean updatable(Users user, PostUpdateForm postForm, BindingResult bindingResult, Post post) {
         //유동 글 비밀번호 검증
         if(post.getPostType()==PostType.ANONYMOUS){
-            if (!postForm.getPassword().isBlank()&&!post.getPassword().equals(postForm.password)) {
+            if(!StringUtils.hasText(postForm.password)){
+                log.info("updatable : 비밀번호 미입력");
+                bindingResult.rejectValue("password","password","비밀번호를 입력해주세요");
+            }
+            else if (!post.getPassword().equals(postForm.password)) {
                 log.info("updatable : 비밀번호 불일치");
                 bindingResult.rejectValue("password","password","비밀번호가 다릅니다!");
             }
@@ -141,11 +151,12 @@ public class PostController {
 
     @GetMapping("/{postId}/delete")
     public String enterPasswordOrNot(@PathVariable Long postId,
-                                     @Login Users user,Model model) {
+                                     @Login Users user, Model model) {
         Post post = postService.findPost(postId);
         boolean accessible = accessible(user, post);
         if (!accessible) {
-            return "redirect:/forum/{forumId}/post/{postId}";
+            //return "redirect:/forum/{forumId}/post/{postId}";
+            throw new NotAuthorizedException("인증되지 않은 사용자 접근입니다.");
         }
 
         if (post.getPostType() == PostType.NORMAL) {
@@ -158,10 +169,16 @@ public class PostController {
     }
 
     @PostMapping("/{postId}/delete")
-    public String delete(@PathVariable Long postId, @ModelAttribute(name = "password") String password,
+    public String delete(@PathVariable Long postId,
+                         @Login Users user,
+                         @ModelAttribute(name = "password") String password,
                          BindingResult bindingResult){
         Post post = postService.findPost(postId);
-
+        boolean accessible = accessible(user, post);
+        if (!accessible) {
+            //return "redirect:/forum/{forumId}/post/{postId}";
+            throw new NotAuthorizedException("인증되지 않은 사용자 접근입니다.");
+        }
         if(!StringUtils.hasText(password)||(post.getPassword() != null && !post.getPassword().equals(password))){
             log.info("post.getPassword()={}", post.getPassword());
             log.info("password={}", password);
@@ -200,7 +217,8 @@ public class PostController {
 
         boolean accessible = accessible(user, post);
         if (!accessible) {
-            return "redirect:/forum/{forumId}/post/{postId}";
+            //return "redirect:/forum/{forumId}/post/{postId}";
+            throw new NotAuthorizedException("인증되지 않은 사용자 접근입니다.");
         }
 
         model.addAttribute("postId", postId);
@@ -210,13 +228,13 @@ public class PostController {
     }
 
     private boolean accessible(Users user, Post post) {
-        //로그인한 사용자가 유동글 지우려려하면 리다이렉트
-        if(post.getPostType()==PostType.ANONYMOUS && user !=null){
+        //로그인한 사용자가 유동글 지우려려하면 리다이렉트->일반 사용자도 유동글 삭제 관여 가능
+        /*if(post.getPostType()==PostType.ANONYMOUS && user !=null){
             log.info("accessible : 로그인 사용자가 글 수정접근");
             return false;
-        }
+        }*/
         //유동이 일반 글 지우려하면 리다이렉트
-        else if(post.getPostType()==PostType.NORMAL && user ==null ){
+        if(post.getPostType()==PostType.NORMAL && user ==null ){
             log.info("accessible : 비로그인 사용자가 글 수정접근");
             return false;
         }
@@ -260,7 +278,6 @@ public class PostController {
         @NotBlank(message = "제목을 입력하세요.")
         private String title;
         private PostType postType;
-        @NotBlank(message = "비밀번호를 입력하세요")
         private String password;
         @NotBlank(message = "내용을 입력하세요")
         private String content;

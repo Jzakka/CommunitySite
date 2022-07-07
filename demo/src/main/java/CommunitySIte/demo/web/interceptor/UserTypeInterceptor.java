@@ -2,6 +2,7 @@ package CommunitySIte.demo.web.interceptor;
 
 import CommunitySIte.demo.domain.UserType;
 import CommunitySIte.demo.domain.Users;
+import CommunitySIte.demo.exception.NotAuthorizedException;
 import CommunitySIte.demo.web.SessionConst;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -27,8 +28,9 @@ public class UserTypeInterceptor implements HandlerInterceptor {
 
             //홈화면이 아니라 오류화면으로 넘어가게 수정 필요
             //아님 알람창으로 경고를 띄운다던가
-            response.sendRedirect("/");
-            return false;
+//            response.sendRedirect("/");
+//            return false;
+            throw new NotAuthorizedException("인증되지 않은 사용자 접근입니다.");
         }
         return true;
     }

@@ -17,6 +17,11 @@ logging.level:
   org.hibernate.SQL: debug
 
 server:
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
   servlet:
     session:
       tracking-modes: cookie
+      timeout: 300

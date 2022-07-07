@@ -4,6 +4,7 @@ import CommunitySIte.demo.domain.Comment;
 import CommunitySIte.demo.domain.Post;
 import CommunitySIte.demo.domain.PostType;
 import CommunitySIte.demo.domain.Users;
+import CommunitySIte.demo.exception.NotAuthorizedException;
 import CommunitySIte.demo.service.CommentService;
 import CommunitySIte.demo.service.PostService;
 import CommunitySIte.demo.web.argumentresolver.Login;
@@ -29,7 +30,14 @@ public class CommentController {
 
     private final CommentService commentService;
     private final PostService postService;
-
+    @ModelAttribute("forumId")
+    public Long forumId(@PathVariable Long forumId) {
+        return forumId;
+    }
+    @ModelAttribute("postId")
+    public Long postId(@PathVariable Long postId) {
+        return postId;
+    }
     @ModelAttribute("postType")
     public PostType[] postType() {
         return PostType.values();
@@ -47,7 +55,8 @@ public class CommentController {
         Comment comment = commentService.findComment(commentId);
         boolean accessible = accessible(user, comment);
         if (!accessible) {
-            return "redirect:/forum/{forumId}/post/{postId}";
+            //return "redirect:/forum/{forumId}/post/{postId}";
+            throw new NotAuthorizedException("인증되지 않은 사용자 접근입니다.");
         }
 
         if (comment.getPostType() == PostType.NORMAL) {
@@ -61,13 +70,13 @@ public class CommentController {
     }
 
     private boolean accessible(Users user, Comment comment) {
-        //로그인한 사용자가 유동글 지우려려하면 리다이렉트
-        if(comment.getPostType()==PostType.ANONYMOUS && user !=null){
+        //로그인한 사용자가 유동글 지우려려하면 리다이렉트->일반 사용자도 유동글 삭제 개입가능
+        /*if(comment.getPostType()==PostType.ANONYMOUS && user !=null){
             log.info("accessible : 로그인 사용자가 댓글 수정접근");
             return false;
-        }
+        }*/
         //유동이 일반 글 지우려하면 리다이렉트
-        else if(comment.getPostType()==PostType.NORMAL && user ==null ){
+        if(comment.getPostType()==PostType.NORMAL && user ==null ){
             log.info("accessible : 비로그인 사용자가 댓글 수정접근");
             return false;
         }
@@ -84,9 +93,16 @@ public class CommentController {
     }
 
     @PostMapping("/{commentId}/delete")
-    public String delete(@PathVariable Long commentId, @ModelAttribute(name = "password") String password,
+    public String delete(@PathVariable Long commentId,
+                         @Login Users user,
+                         @ModelAttribute(name = "password") String password,
                          BindingResult bindingResult) {
         Comment comment = commentService.findComment(commentId);
+        boolean accessible = accessible(user, comment);
+        if (!accessible) {
+            //return "redirect:/forum/{forumId}/post/{postId}";
+            throw new NotAuthorizedException("인증되지 않은 사용자 접근입니다.");
+        }
 
         if(!StringUtils.hasText(password)||(comment.getPassword() != null && !comment.getPassword().equals(password))){
             log.info("post.getPassword()={}", comment.getPassword());

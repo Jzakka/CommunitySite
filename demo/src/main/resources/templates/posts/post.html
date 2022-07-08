@@ -20,7 +20,7 @@
             <p th:text="'Title :' + ${post.getTitle()}"></p>
         </div>
         <div th:text="'Writer:' + ${(post.postType!=postType[0])?post.anonymousUserName:post.user.userName}"></div>
-        <div th:text="'Date  :' + ${post.getLastModifiedDate().withNano(0)}"></div>
+        <div th:text="'Date  :' + ${{post.getLastModifiedDate().withNano(0)}}"></div>
         <hr>
         <div th:text="${post.getContent()}"></div>
     </div>
@@ -29,11 +29,11 @@
     <div th:each="comment:${post.getComments()}">
         <table>
             <tr>
-                <td th:text="'>>'+${(comment.postType!=postType[0])?comment.anonymousUserName:comment.user.userName}"></td>
-                <td th:text="${comment.lastModifiedDate.withNano(0)}"></td>
+                <td th:text="${(comment.postType!=postType[0])?comment.anonymousUserName:comment.user.userName}"></td>
+                <td th:text="${{comment.lastModifiedDate.withNano(0)}}"></td>
             </tr>
             <tr>
-                <td th:text="${comment.content}"></td>
+                <td th:text="'>>'+${comment.content}"></td>
             </tr>
             <tr th:if="${(comment.postType==comment.postType.ANONYMOUS)||(comment.user!=null && comment.user.equals(user))}">
                 <td><a th:href="@{/forum/{forumId}/post/{postId}/comment/{commentId}/delete(forumId=${forumId},

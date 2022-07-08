@@ -16,7 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Post {
+public class Post implements Accessible{
 
     @Id
     @GeneratedValue

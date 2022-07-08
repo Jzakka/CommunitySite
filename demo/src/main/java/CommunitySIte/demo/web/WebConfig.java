@@ -1,10 +1,12 @@
 package CommunitySIte.demo.web;
 
 import CommunitySIte.demo.web.argumentresolver.LoginUserArgumentResolver;
+import CommunitySIte.demo.web.formatter.DateFormatter;
 import CommunitySIte.demo.web.interceptor.LogInterceptor;
 import CommunitySIte.demo.web.interceptor.LoginCheckInterceptor;
 import CommunitySIte.demo.web.interceptor.UserTypeInterceptor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -13,6 +15,11 @@ import java.util.List;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addFormatter(new DateFormatter());
+    }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {

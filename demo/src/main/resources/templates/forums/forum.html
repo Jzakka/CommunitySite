@@ -65,7 +65,7 @@
                th:text="'Title :' + ${post.title}"></a>
         </div>
         <div th:text="'Writer:' + ${(post.postType!=postType[0])?post.anonymousUserName:post.user.userName}"></div>
-        <div th:text="'Date  :' + ${post.lastModifiedDate.withNano(0)}"></div>
+        <div th:text="'Date  :' + ${{post.lastModifiedDate.withNano(0)}}"></div>
         <div th:text="'>>>' + ${post.content}"></div>
     </div>
 </body>

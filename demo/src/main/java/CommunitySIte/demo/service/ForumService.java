@@ -2,12 +2,15 @@ package CommunitySIte.demo.service;
 
 import CommunitySIte.demo.domain.*;
 import CommunitySIte.demo.repository.ForumRepository;
+import CommunitySIte.demo.repository.PostRepository;
 import CommunitySIte.demo.repository.UserRepository;
+import CommunitySIte.demo.web.controller.page.Criteria;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -16,6 +19,7 @@ public class ForumService {
 
     private final ForumRepository forumRepository;
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
 
     public Long openForum(Forum forum) {
         Long saveId = forumRepository.save(forum);
@@ -54,6 +58,14 @@ public class ForumService {
     public void addCategory(Long forumId, String categoryName) {
         Forum forum = forumRepository.findOne(forumId);
         forum.addCategory(new Category(categoryName));
+    }
+
+    public List<Post> showPostsByPage(Criteria criteria, Forum forum) {
+        return postRepository.findPostsByPage(criteria, forum);
+    }
+
+    public List<Post> showPostsByPage(Criteria criteria, Forum forum, Category category) {
+        return postRepository.findPostsByPage(criteria, forum, category);
     }
 
    /* public void dismissalManager(Long forumId, Long userId) {

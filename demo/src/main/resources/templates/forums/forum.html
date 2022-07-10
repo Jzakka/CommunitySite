@@ -6,10 +6,12 @@
 </head>
 <body>
 <h2><a href = "/">CommunitySite</a></h2>
-<h3><a th:href th:text="${forum.forumName}"></a></h3>
+<h3><a th:href="@{/forum/{forumId}(forumId=${forum.id})}" th:text="${forum.forumName}"></a></h3>
 
 <div th:if="${user!=null && user.userType==user.userType.ADMIN}">
     <a th:href="@{/forum/{forumId}/category/new(forumId=${forum.id})}">카테고리 생성</a>
+    </div>
+<div>
     <ul>
         <li th:each="category:${categories}" >
             <a th:href="@{/forum/{forumId}/category/{categoryId}(forumId=${forum.id}, categoryId=${category.id})}"
@@ -19,7 +21,7 @@
 </div>
 
 <div>
-    <form th:action="@{/forum/{forumId}/post/new(forumId=${forum.id})}" th:object="${postForm}" method="post">
+    <form th:action="@{/forum/{forumId}/post/new(forumId=${forum.id})}" th:object="${postForm}" method="post" enctype="multipart/form-data">
         <input type="hidden" id="posts" name="posts" th:value="${posts}">
         <input type="hidden" id="categories" name="categories" th:value="${categories}">
         <input type="hidden" id="forumName" name="forumName" th:value="${forum.forumName}">
@@ -45,7 +47,10 @@
                         th:text="${category.categoryName}">일반</option>
             </select>
         </div>
-
+        <div>
+            <label for="imageFile">이미지 파일 추가</label>
+            <input type="file" id="imageFile" name="imageFile">
+        </div>
         <div>
             <label for="content">내용</label>
             <textarea cols="50" rows="10" id="content" th:field="*{content}">
@@ -66,7 +71,18 @@
         </div>
         <div th:text="'Writer:' + ${(post.postType!=postType[0])?post.anonymousUserName:post.user.userName}"></div>
         <div th:text="'Date  :' + ${{post.lastModifiedDate.withNano(0)}}"></div>
+        <div th:if="${post.imageFile}"><img th:src="|/image/${post.imageFile.storeFileName}|" width="300" height="300"/></div>
         <div th:text="'>>>' + ${post.content}"></div>
     </div>
+<ul>
+    <li th:if="${pageCreator.prev}"><a th:href="@{{currentUrl}?page={start}(currentUrl=${currentUrl}, start=${(pageCreator.start)-1})}">prev</a></li>
+
+    <li th:each="iter:${#numbers.sequence(pageCreator.start,pageCreator.end)}">
+        <a th:href="@{{currentUrl}?page={num}(currentUrl=${currentUrl}, num=${iter})}" th:text="${iter}"></a>
+    </li>
+
+
+    <li th:if="${pageCreator.next}"><a th:href="@{{currentUrl}?page={end}(currentUrl=${currentUrl}, end=${(pageCreator.end)+1})}">next</a></li>
+</ul>
 </body>
 </html>

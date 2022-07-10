@@ -22,6 +22,7 @@
         <div th:text="'Writer:' + ${(post.postType!=postType[0])?post.anonymousUserName:post.user.userName}"></div>
         <div th:text="'Date  :' + ${{post.getLastModifiedDate().withNano(0)}}"></div>
         <hr>
+        <div th:if="${post.imageFile}"><img th:src="|/image/${post.imageFile.storeFileName}|" width="300" height="300"/></div>
         <div th:text="${post.getContent()}"></div>
     </div>
     <hr>

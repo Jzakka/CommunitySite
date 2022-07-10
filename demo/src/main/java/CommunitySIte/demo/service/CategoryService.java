@@ -29,4 +29,8 @@ public class CategoryService {
         Category category = categoryRepository.findOne(categoryId);
         return category.getPosts();
     }
+
+    public Category findOne(Long categoryId) {
+        return categoryRepository.findOne(categoryId);
+    }
 }

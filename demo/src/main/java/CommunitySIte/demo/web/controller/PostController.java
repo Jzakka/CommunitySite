@@ -4,6 +4,7 @@ import CommunitySIte.demo.domain.Forum;
 import CommunitySIte.demo.domain.Post;
 import CommunitySIte.demo.domain.PostType;
 import CommunitySIte.demo.domain.Users;
+import CommunitySIte.demo.domain.file.FileStore;
 import CommunitySIte.demo.exception.NotAuthorizedException;
 import CommunitySIte.demo.service.ForumService;
 import CommunitySIte.demo.service.PostService;
@@ -20,12 +21,14 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -36,6 +39,7 @@ public class PostController {
 
     private final PostService postService;
     private final ForumService forumService;
+    private final FileStore fileStore;
 
     @ModelAttribute("forumId")
     public Long forumId(@PathVariable Long forumId) {
@@ -57,12 +61,21 @@ public class PostController {
         return loginUser;
     }
 
+    /**
+     * 이미지 가능하게 변경 필요
+     * @param postForm
+     * @param bindingResult
+     * @param loginUser
+     * @param forumId
+     * @param model
+     * @return
+     */
     @PostMapping("/new")
     public String feed(@ModelAttribute("postForm") @Validated PostFeedForm postForm,
                        BindingResult bindingResult,
                        @Login  Users loginUser,
                        @PathVariable Long forumId,
-                       Model model) {
+                       Model model) throws IOException {
         //일반 사용자냐 유동이냐에 따라 투고 작성자 이름이 달라야함
         //일반 사용자
         //유동 사용자
@@ -91,20 +104,28 @@ public class PostController {
             return "forums/forum";
         }
         if ((loginUser == null)) {
-            postService.feedPost(postForm.forumId, postForm.title, postForm.username,
+            postService.feedPost(postForm.forumId, postForm.title, fileStore.storeFile(postForm.imageFile),postForm.username,
                     postForm.categoryId, postForm.password, postForm.content);
         } else {
-            postService.feedPost(postForm.forumId, postForm.title, loginUser, postForm.categoryId, postForm.content);
+            postService.feedPost(postForm.forumId, postForm.title, fileStore.storeFile(postForm.imageFile) , loginUser, postForm.categoryId, postForm.content);
         }
 
         return "redirect:/forum/{forumId}";
     }
 
+    /**
+     * 이미지 가능하게 변경 필요
+     * @param postId
+     * @param user
+     * @param postForm
+     * @param bindingResult
+     * @return
+     */
     @PostMapping("/{postId}/update")
     public String update(@PathVariable Long postId,
                          @Login Users user,
                          @ModelAttribute("postForm") @Validated PostUpdateForm postForm,
-                         BindingResult bindingResult){
+                         BindingResult bindingResult) throws IOException {
         Post post = postService.findPost(postId);
         boolean accessible = AccessibilityChecker.accessible(user, post);
         if (!accessible) {
@@ -121,11 +142,13 @@ public class PostController {
             return "posts/updateForm";
         }
 
-        postService.update(postId, postForm.title, postForm.content);
+        postService.update(postId, postForm.title, fileStore.storeFile(postForm.imageFile), postForm.content);
         return "redirect:/forum/{forumId}/post/{postId}";
     }
 
     private boolean updatable(Users user, PostUpdateForm postForm, BindingResult bindingResult, Post post) {
+        log.info("post {} 가 update 가능한지 판독중 ...", post.getId());
+        log.info("postForm = {}" , postForm);
         //유동 글 비밀번호 검증
         if(post.getPostType()==PostType.ANONYMOUS){
             if(!StringUtils.hasText(postForm.password)){
@@ -241,6 +264,7 @@ public class PostController {
         private String password;
         @NotBlank(message = "내용을 입력하세요.")
         private String content;
+        private MultipartFile imageFile;
         private Long categoryId;
         private Long forumId;
     }
@@ -259,6 +283,7 @@ public class PostController {
         private String title;
         private PostType postType;
         private String password;
+        private MultipartFile imageFile;
         @NotBlank(message = "내용을 입력하세요")
         private String content;
 

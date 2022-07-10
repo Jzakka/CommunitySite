@@ -1,12 +1,11 @@
 package CommunitySIte.demo.web.controller;
 
-import CommunitySIte.demo.domain.Forum;
-import CommunitySIte.demo.domain.Post;
-import CommunitySIte.demo.domain.PostType;
-import CommunitySIte.demo.domain.Users;
+import CommunitySIte.demo.domain.*;
 import CommunitySIte.demo.service.CategoryService;
 import CommunitySIte.demo.service.ForumService;
 import CommunitySIte.demo.web.argumentresolver.Login;
+import CommunitySIte.demo.web.controller.page.Criteria;
+import CommunitySIte.demo.web.controller.page.PageCreator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
@@ -44,13 +44,29 @@ public class CategoryController {
     @GetMapping("/{categoryId}")
     public String showPostsByCategory(@PathVariable Long forumId,
                                       @PathVariable Long categoryId,
-                                      Model model){
+                                      @RequestParam(required = false) Integer page,
+                                      HttpServletRequest request,
+                                      Model model,
+                                      Criteria criteria){
+        criteria.setPage(page==null?1:page);
+        Category category = categoryService.findOne(categoryId);
         Forum forum = forumService.showForum(forumId);
         List<Post> posts = categoryService.showPostsByCategory(categoryId);
+
+        PageCreator pageCreator = new PageCreator();
+        pageCreator.setCriteria(criteria);
+        pageCreator.setTotalCount(posts.size());
+        log.info("pageCreator={}", pageCreator);
+
         model.addAttribute("postForm",new PostController.PostFeedForm());
         model.addAttribute("forum", forum);
-        model.addAttribute("posts", posts);
         model.addAttribute("categories", forumService.showCategories(forumId));
+
+        List<Post> list = forumService.showPostsByPage(criteria, forum, category);
+
+        model.addAttribute("currentUrl", request.getRequestURI());
+        model.addAttribute("posts", list);
+        model.addAttribute("pageCreator", pageCreator);
 
         return "forums/forum";
     }

@@ -25,3 +25,6 @@ server:
     session:
       tracking-modes: cookie
       timeout: 300
+
+file:
+  dir: /Users/Projects/file/

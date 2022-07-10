@@ -1,6 +1,7 @@
 package CommunitySIte.demo.service;
 
 import CommunitySIte.demo.domain.*;
+import CommunitySIte.demo.domain.file.UploadFile;
 import CommunitySIte.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,18 +20,18 @@ public class PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
 
-    public void feedPost(Long forumId, String title,  String anonymousUsername, Long categoryId,
+    public void feedPost(Long forumId, String title, UploadFile imageFile, String anonymousUsername, Long categoryId,
                          String password, String content ) {
         Forum forum = forumRepository.findOne(forumId);
         Category category = categoryRepository.findOne(categoryId);
-        Post post = Post.createPost(forum, title,category, anonymousUsername, password, content);
+        Post post = Post.createPost(forum, title, imageFile, category, anonymousUsername, password, content);
         postRepository.save(post);
     }
 
-    public void feedPost(Long forumId, String title, Users user, Long categoryId, String content) {
+    public void feedPost(Long forumId, String title,UploadFile imageFile, Users user, Long categoryId, String content) {
         Forum forum = forumRepository.findOne(forumId);
         Category category = categoryRepository.findOne(categoryId);
-        Post post = Post.createPost(forum, title, user, category, content);
+        Post post = Post.createPost(forum, title, imageFile, user, category, content);
         postRepository.save(post);
     }
 
@@ -73,8 +74,8 @@ public class PostService {
         findPost.increaseBad();
     }
 
-    public void update(Long id, String title, String content) {
-        postRepository.update(id, title, content);
+    public void update(Long id, String title, UploadFile imageFile, String content) {
+        postRepository.update(id, title,imageFile, content);
     }
 
     /**

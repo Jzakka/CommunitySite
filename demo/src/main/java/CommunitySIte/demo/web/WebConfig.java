@@ -38,7 +38,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 .excludePathPatterns("/", "/forum/{forumId}","/forum/{forumId}/category/**",
                         "/forum/{forumId}/post/**","/users/new","/login",
-                        "/logout","/css/**", "/*.ico","/error");
+                        "/logout","/css/**", "/*.ico","/error","/image/**");
 
         registry.addInterceptor(new UserTypeInterceptor())
                 .order(3)

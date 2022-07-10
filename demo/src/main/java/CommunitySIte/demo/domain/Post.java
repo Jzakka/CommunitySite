@@ -1,5 +1,6 @@
 package CommunitySIte.demo.domain;
 
+import CommunitySIte.demo.domain.file.UploadFile;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,7 +48,6 @@ public class Post implements Accessible{
     private int good;
     private int bad;
 
-
     /**
      * cascade=REMOVE가 작동안함...
      * OnDelete는 되는데 왜인지 잘 모르겠음. 일단 이걸로 설정
@@ -57,12 +57,14 @@ public class Post implements Accessible{
     @OrderBy("id desc")
     private List<Comment> comments = new ArrayList<>();
 
-    private String image_id;
+    @Embedded
+    private UploadFile imageFile;
 
-    public static Post createPost(Forum forum, String title, Category category, String anonymousUsername, String password, String content) {
+    public static Post createPost(Forum forum, String title,UploadFile imageFile, Category category, String anonymousUsername, String password, String content) {
         Post post = new Post();
         post.setForum(forum);
         post.setTitle(title);
+        post.setImageFile(imageFile);
         post.setCategory(category);
         post.setPostType(PostType.ANONYMOUS);
         post.setAnonymousUserName(anonymousUsername);
@@ -72,11 +74,12 @@ public class Post implements Accessible{
         return post;
     }
 
-    public static Post createPost(Forum forum, String title, Users user, Category category, String content) {
+    public static Post createPost(Forum forum, String title,UploadFile imageFile, Users user, Category category, String content) {
         Post post = new Post();
         post.setForum(forum);
         post.setPostType(PostType.NORMAL);
         post.setTitle(title);
+        post.setImageFile(imageFile);
         post.setUser(user);
         post.setCategory(category);
         post.setContent(content);
@@ -84,9 +87,10 @@ public class Post implements Accessible{
         return post;
     }
 
-    public void update(String title, String content) {
+    public void update(String title, UploadFile imageFile, String content) {
         setTitle(title);
         setContent(content);
+        setImageFile(imageFile);
         setLastModifiedDate(LocalDateTime.now());
     }
 

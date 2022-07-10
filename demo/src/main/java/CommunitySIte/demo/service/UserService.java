@@ -1,7 +1,9 @@
 package CommunitySIte.demo.service;
 
+import CommunitySIte.demo.domain.Forum;
 import CommunitySIte.demo.domain.Post;
 import CommunitySIte.demo.domain.Users;
+import CommunitySIte.demo.repository.ForumRepository;
 import CommunitySIte.demo.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.NoResultException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -18,6 +21,8 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+
+    private final ForumRepository forumRepository;
 
     public Long join(Users user) {
         userRedundancyCheck(user);
@@ -29,6 +34,11 @@ public class UserService {
     public Users showUser(Long id) {
         Users findUser = userRepository.findOne(id);
         return findUser;
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Users> searchUser(String loginId) {
+        return userRepository.findByLoginId(loginId);
     }
 
     @Transactional(readOnly = true)

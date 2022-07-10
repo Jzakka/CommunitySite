@@ -15,6 +15,13 @@ public class PageCreator {
 
     public void setTotalCount(int totalCount) {
         this.totalCount = totalCount;
+        if (this.totalCount == 0) {
+            start = 1;
+            end = 1;
+            prev = false;
+            next = false;
+            return;
+        }
         calcData();
     }
 

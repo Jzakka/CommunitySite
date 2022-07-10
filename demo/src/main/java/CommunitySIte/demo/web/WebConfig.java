@@ -42,6 +42,6 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addInterceptor(new UserTypeInterceptor())
                 .order(3)
-                .addPathPatterns("/forum/{forumId}/category/new");
+                .addPathPatterns("/forum/new", "/forum/{forumId}/manager");
     }
 }

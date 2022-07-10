@@ -8,7 +8,7 @@
 <h2><a href = "/">CommunitySite</a></h2>
 <h3><a th:href="@{/forum/{forumId}(forumId=${forum.id})}" th:text="${forum.forumName}"></a></h3>
 
-<div th:if="${user!=null && user.userType==user.userType.ADMIN}">
+<div th:if="${user!=null && (user.userType==user.userType.ADMIN || isManager)}">
     <a th:href="@{/forum/{forumId}/category/new(forumId=${forum.id})}">카테고리 생성</a>
     </div>
 <div>

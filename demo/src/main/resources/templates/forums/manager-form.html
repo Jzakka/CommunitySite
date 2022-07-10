@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form th:action="@{/forum/{forumId}/manager(forumId=${forumId})}" th:object="${managerForm}" method="post">
+    <label for="userId">매니저를 위임할 사용자ID를 입력</label>
+    <input type="text" id="userId" th:field="*{userId}">
+    <div th:errors="*{userId}"></div>
+    <button type="submit">입력</button>
+</form>
+</body>
+</html>

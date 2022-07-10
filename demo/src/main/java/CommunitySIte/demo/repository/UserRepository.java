@@ -1,5 +1,6 @@
 package CommunitySIte.demo.repository;
 
+import CommunitySIte.demo.domain.Forum;
 import CommunitySIte.demo.domain.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

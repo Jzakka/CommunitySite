@@ -1,6 +1,7 @@
 package CommunitySIte.demo.web;
 
 import CommunitySIte.demo.domain.Forum;
+import CommunitySIte.demo.domain.ForumType;
 import CommunitySIte.demo.domain.UserType;
 import CommunitySIte.demo.domain.Users;
 import CommunitySIte.demo.service.ForumService;
@@ -41,13 +42,18 @@ public class InitDataConstructor {
     public void initForum(){
         Forum forum = new Forum();
         forum.setForumName("forum1");
+        forum.setForumType(ForumType.MAIN);
         Forum forum2 = new Forum();
         forum2.setForumName("forum2");
+        forum2.setForumType(ForumType.MAIN);
         Forum forum3 = new Forum();
+        forum3.setForumType(ForumType.MINOR);
         forum3.setForumName("forum3");
         Forum forum4 = new Forum();
+        forum4.setForumType(ForumType.MINOR);
         forum4.setForumName("forum4");
         Forum forum5 = new Forum();
+        forum5.setForumType(ForumType.MAIN);
         forum5.setForumName("forum5");
         forumService.openForum(forum);
         forumService.openForum(forum2);

@@ -1,6 +1,7 @@
 package CommunitySIte.demo.web.controller;
 
 import CommunitySIte.demo.domain.*;
+import CommunitySIte.demo.exception.NotAuthorizedException;
 import CommunitySIte.demo.service.CategoryService;
 import CommunitySIte.demo.service.ForumService;
 import CommunitySIte.demo.web.argumentresolver.Login;
@@ -45,6 +46,7 @@ public class CategoryController {
     public String showPostsByCategory(@PathVariable Long forumId,
                                       @PathVariable Long categoryId,
                                       @RequestParam(required = false) Integer page,
+                                      @Login Users loginUser,
                                       HttpServletRequest request,
                                       Model model,
                                       Criteria criteria){
@@ -68,31 +70,65 @@ public class CategoryController {
         model.addAttribute("posts", list);
         model.addAttribute("pageCreator", pageCreator);
 
+        boolean isManager = isManager(loginUser, forum);
+        model.addAttribute("isManager", isManager);
+
         return "forums/forum";
     }
 
     @GetMapping("/new")
-    public String addCategoryForm(@PathVariable Long forumId, Model model) {
+    public String addCategoryForm(@PathVariable Long forumId,
+                                  @Login Users loginUser,
+                                  Model model) {
         Forum forum = forumService.showForum(forumId);
+
+        boolean isManager = isManager(loginUser, forum);
+        if (!isManager) {
+            throw new NotAuthorizedException("매니저만 카테고리 추가가능");
+        }
+
         model.addAttribute("categoryForm", new CategoryForm());
         return "categories/addCategoryForm";
     }
 
+
+
     @PostMapping("/new")
     public String addCategory(@PathVariable Long forumId,
-                              @ModelAttribute @Validated CategoryForm categoryForm, BindingResult bindingResult) {
+                              @Login Users loginUser,
+                              @ModelAttribute @Validated CategoryForm categoryForm,
+                              BindingResult bindingResult) {
+        Forum forum = forumService.showForum(forumId);
+
+        boolean isManager = isManager(loginUser, forum);
+        if (!isManager) {
+            throw new NotAuthorizedException("매니저만 카테고리 추가가능");
+        }
+
         if(bindingResult.hasErrors()){
             log.info("errors = {}", bindingResult);
 
             return "categories/addCategoryForm";
         }
 
-        Forum forum = forumService.showForum(forumId);
         categoryService.newCategory(forum, categoryForm.categoryName);
 
         return "redirect:/forum/{forumId}";
     }
 
+
+    public static boolean isManager(Users loginUser, Forum forum) {
+        if(loginUser.getUserType()==UserType.ADMIN) return true;
+        boolean isManager = false;
+        List<ForumManager> forumManagers = forum.getForumManagers();
+        for (ForumManager forumManager : forumManagers) {
+            if (forumManager.getUser().equals(loginUser)) {
+                isManager = true;
+                break;
+            }
+        }
+        return isManager;
+    }
 
     @Data
     @NoArgsConstructor

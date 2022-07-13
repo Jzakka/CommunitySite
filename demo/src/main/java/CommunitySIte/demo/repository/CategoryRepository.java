@@ -23,4 +23,11 @@ public class CategoryRepository {
     }
 
 
+    public Category findWithForumAndPosts(Long categoryId) {
+       return em.createQuery("select distinct c from Category c" +
+                        " join fetch c.forum" +
+                        " left join fetch c.posts" +
+                        " where c.id=:id", Category.class).setParameter("id", categoryId)
+                .getSingleResult();
+    }
 }

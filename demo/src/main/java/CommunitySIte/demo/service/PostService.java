@@ -100,4 +100,11 @@ public class PostService {
         postRepository.delete(id);
     }
 
+    public Post showPostWithComment(Long postId) {
+        return postRepository.findPostAndComments(postId);
+    }
+
+    public Post findPostAndForum(Long postId) {
+        return postRepository.findPostAndForum(postId);
+    }
 }

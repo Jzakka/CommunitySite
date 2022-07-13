@@ -33,4 +33,8 @@ public class CategoryService {
     public Category findOne(Long categoryId) {
         return categoryRepository.findOne(categoryId);
     }
+
+    public Category findWithForumAndPosts(Long categoryId) {
+        return categoryRepository.findWithForumAndPosts(categoryId);
+    }
 }

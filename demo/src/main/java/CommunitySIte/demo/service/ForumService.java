@@ -68,6 +68,22 @@ public class ForumService {
         return postRepository.findPostsByPage(criteria, forum, category);
     }
 
+    public Integer getPostsCount(Forum forum) {
+        return forumRepository.getPostsCount(forum);
+    }
+
+    public Forum showForumWithCategory(Long forumId) {
+        return forumRepository.findForumAndCategory(forumId);
+    }
+
+    public Forum showForumWithPosts(Long forumId) {
+        return forumRepository.findForumAndPosts(forumId);
+    }
+
+    public Forum showForumWithManager(Long forumId) {
+        return forumRepository.findForumAndManager(forumId);
+    }
+
    /* public void dismissalManager(Long forumId, Long userId) {
 
     }*/

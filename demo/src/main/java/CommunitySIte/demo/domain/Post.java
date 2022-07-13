@@ -40,6 +40,8 @@ public class Post implements Accessible{
     private PostType postType;
 
     private String title;
+
+    @Column(length = 1500)
     private String content;
     private String anonymousUserName;
     private String password;

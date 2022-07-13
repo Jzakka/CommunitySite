@@ -77,4 +77,19 @@ public class PostRepository {
                 .setMaxResults(criteria.getPerPageNum())
                 .getResultList();
     }
+
+    public Post findPostAndComments(Long postId) {
+        return em.createQuery("select p from Post p" +
+                        " left join fetch p.comments" +
+                        " join fetch p.forum" +
+                        " where p.id=:id", Post.class).setParameter("id", postId)
+                .getSingleResult();
+    }
+
+    public Post findPostAndForum(Long postId) {
+       return em.createQuery("select p from Post p" +
+                        " join fetch p.forum" +
+                        " where p.id=:id", Post.class).setParameter("id", postId)
+                .getSingleResult();
+    }
 }

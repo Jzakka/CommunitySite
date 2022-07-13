@@ -1,7 +1,6 @@
 package CommunitySIte.demo.web.controller;
 
 import CommunitySIte.demo.domain.*;
-import CommunitySIte.demo.service.CategoryService;
 import CommunitySIte.demo.service.ForumManageService;
 import CommunitySIte.demo.service.ForumService;
 import CommunitySIte.demo.service.UserService;
@@ -20,12 +19,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static CommunitySIte.demo.web.controller.CategoryController.isManager;
@@ -45,9 +41,28 @@ public class ForumController {
         return PostType.values();
     }
 
+    @ModelAttribute("forumTypes")
+    public ForumType[] forumTypes(){
+        return ForumType.values();}
+
     @ModelAttribute("user")
     public Users user(@Login Users loginUser) {
         return loginUser;
+    }
+
+    @GetMapping("/new")
+    public String forumForm(@ModelAttribute("forumForm") ForumForm form) {
+        return "forums/forum-form";
+    }
+
+    @PostMapping("/new")
+    public String newForum(@ModelAttribute @Validated ForumForm form) {
+        Forum forum = new Forum();
+        forum.setForumName(form.forumName);
+        forum.setForumType(form.forumType);
+        forumService.openForum(forum);
+
+        return "redirect:/";
     }
 
     @GetMapping("/{id}")
@@ -59,12 +74,12 @@ public class ForumController {
                             Criteria criteria) {
         criteria.setPage(page == null ? 1 : page);
         log.info("criteria.page={}", criteria.getPage());
-        Forum forum = forumService.showForum(forumId);
-        List<Post> posts = forumService.showPosts(forumId);
+        Forum forum = forumService.showForumWithManager(forumId);
+        Integer postsCount = forumService.getPostsCount(forum);
 
         PageCreator pageCreator = new PageCreator();
         pageCreator.setCriteria(criteria);
-        pageCreator.setTotalCount(posts.size());
+        pageCreator.setTotalCount(postsCount);
 
         model.addAttribute("postForm", new PostController.PostFeedForm());
         model.addAttribute("forum", forum);
@@ -84,7 +99,7 @@ public class ForumController {
 
     @GetMapping("/{forumId}/manager")
     public String managerForm(@PathVariable Long forumId,
-                              @ModelAttribute("managerForm")  ManagerForm managerForm) {
+                              @ModelAttribute("managerForm") ManagerForm managerForm) {
         return "forums/manager-form";
     }
 
@@ -109,11 +124,22 @@ public class ForumController {
         return "redirect:/";
     }
 
+
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     private static class ManagerForm {
         @NotBlank(message = "매니저를 설정할 유저ID를 입력해주세요")
-        String  userId;
+        String userId;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class ForumForm {
+        @NotBlank(message = "포럼 명을 입력해주세요.")
+        String forumName;
+        ForumType forumType;
     }
 }

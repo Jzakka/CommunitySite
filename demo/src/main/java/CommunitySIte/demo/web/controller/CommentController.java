@@ -116,6 +116,7 @@ public class CommentController {
             log.info("bindingResult = {}", bindingResult);
             Post post = postService.findPost(postId);
             model.addAttribute("forumId", forumId);
+            model.addAttribute("forumName", post.getForum().getForumName());
             model.addAttribute("post", post);
 
             return "posts/post";

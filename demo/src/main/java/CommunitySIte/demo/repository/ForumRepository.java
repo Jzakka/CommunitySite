@@ -34,4 +34,32 @@ public class ForumRepository {
                 .setParameter("id", id)
                 .executeUpdate();
     }
+
+    public Integer getPostsCount(Forum forum) {
+        return em.createQuery("select count (p) from Post p" +
+                        " where p.forum=:forum",Long.class)
+                .setParameter("forum", forum)
+                .getSingleResult().intValue();
+    }
+
+    public Forum findForumAndCategory(Long forumId) {
+        return em.createQuery("select distinct f from Forum f" +
+                        " join fetch Category c" +
+                        " on f.id=:id", Forum.class).setParameter("id", forumId)
+                .getSingleResult();
+    }
+
+    public Forum findForumAndPosts(Long forumId) {
+        return em.createQuery("select distinct f from Forum f" +
+                        " join fetch f.posts" +
+                        " where f.id=:id", Forum.class).setParameter("id", forumId)
+                .getSingleResult();
+    }
+
+    public Forum findForumAndManager(Long forumId) {
+        return em.createQuery("select distinct f from Forum f" +
+                        " left join fetch f.forumManagers" +
+                        " where f.id=:id", Forum.class).setParameter("id", forumId)
+                .getSingleResult();
+    }
 }

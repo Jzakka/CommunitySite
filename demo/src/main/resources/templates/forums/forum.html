@@ -1,88 +1,131 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:nl2br="https://github.com/bufferings/thymeleaf-extras-nl2br">
+<head th:replace="fragments/header :: header">
     <meta charset="UTF-8">
-    <title th:text="${forum.forumName}">Title</title>
+    <title>Home</title>
 </head>
-<body>
-<h2><a href = "/">CommunitySite</a></h2>
-<h3><a th:href="@{/forum/{forumId}(forumId=${forum.id})}" th:text="${forum.forumName}"></a></h3>
+<body class="bg-light bg-gradient">
 
-<div th:if="${user!=null && (user.userType==user.userType.ADMIN || isManager)}">
-    <a th:href="@{/forum/{forumId}/category/new(forumId=${forum.id})}">카테고리 생성</a>
-    </div>
-<div>
-    <ul>
-        <li th:each="category:${categories}" >
-            <a th:href="@{/forum/{forumId}/category/{categoryId}(forumId=${forum.id}, categoryId=${category.id})}"
-               th:text="${category.categoryName}">전체</a>
-        </li>
-    </ul>
-</div>
+<div th:replace="fragments/bodyHeader :: bodyHeader"/>
 
-<div>
-    <form th:action="@{/forum/{forumId}/post/new(forumId=${forum.id})}" th:object="${postForm}" method="post" enctype="multipart/form-data">
-        <input type="hidden" id="posts" name="posts" th:value="${posts}">
-        <input type="hidden" id="categories" name="categories" th:value="${categories}">
-        <input type="hidden" id="forumName" name="forumName" th:value="${forum.forumName}">
-        <div>
-            <label for="title">제목</label>
-            <input type="text" id="title" th:field="*{title}">
-            <div th:errors="*{title}">제목 기입 오류</div>
-        </div>
-        <div th:if="${user==null}">
-            <label for="username">작성자</label>
-            <input type="text" id="username" th:field="*{username}">
-            <div th:errors="*{username}">작성자 이름 기입 오류</div>
-        </div>
-        <div th:if="${user==null}">
-            <label for="password">비밀번호</label>
-            <input type="password" id="password" th:field="*{password}">
-            <div th:errors="*{password}">비밀번호 기입오류</div>
-        </div>
-        <!--select box 방식 -->
-        <div>
-            <select th:field="*{categoryId}">
-                <option th:each="category:${categories}" th:value="${category.id}"
-                        th:text="${category.categoryName}">일반</option>
-            </select>
-        </div>
-        <div>
-            <label for="imageFile">이미지 파일 추가</label>
-            <input type="file" id="imageFile" name="imageFile">
-        </div>
-        <div>
-            <label for="content">내용</label>
-            <textarea cols="50" rows="10" id="content" th:field="*{content}">
+<a class="text-decoration-none" th:href="@{/forum/{forumId}(forumId=${forum.id})}">
+    <p class="h2 text-center fw-bolder text-secondary" th:text="${forum.forumName}"></p>
+</a>
+
+<div class="bg-secondary bg-opacity-10" style="min-width: 1000px">
+    <div class="row pt-3 ms-4">
+        <div class="col">
+            <form th:action="@{/forum/{forumId}/post/new(forumId=${forum.id})}" th:object="${postForm}" method="post"
+                  enctype="multipart/form-data">
+                <input type="hidden" id="posts" name="posts" th:value="${posts}">
+                <input type="hidden" id="categories" name="categories" th:value="${categories}">
+                <input type="hidden" id="forumName" name="forumName" th:value="${forum.forumName}">
+                <div class="mb-3">
+                    <label for="title" class="form-label">제목</label>
+                    <input type="text" id="title" th:field="*{title}"
+                           th:errorclass="field-error" class="form-control">
+                    <div class="field-error" th:errors="*{title}">제목 기입 오류</div>
+                </div>
+                <div class="row mb-3">
+                    <div th:if="${user==null}" class="col">
+                        <label for="username" class="form-label">작성자</label>
+                        <input type="text" id="username" th:field="*{username}"
+                               th:errorclass="field-error" class="form-control">
+                        <div class="field-error" th:errors="*{username}">작성자 이름 기입 오류</div>
+                    </div>
+                    <div th:if="${user==null}" class="col">
+                        <label for="password" class="form-label">비밀번호</label>
+                        <input type="password" id="password" th:field="*{password}"
+                               th:errorclass="field-error" class="form-control">
+                        <div class="field-error" th:errors="*{password}">비밀번호 기입오류</div>
+                    </div>
+                </div>
+                <!--select box 방식 -->
+                <div class="mb-3">
+                    <label for="categories" class="form-label">카테고리 설정</label>
+                    <select th:field="*{categoryId}" class="form-select form-select-sm"
+                            aria-label=".form-select-sm example">
+                        <option th:each="category:${categories}" th:value="${category.id}"
+                                th:text="${category.categoryName}">일반
+                        </option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="imageFile" class="form-label">이미지 파일 추가</label>
+                    <input type="file" id="imageFile" name="imageFile" class="form-control form-control-sm">
+                </div>
+                <div class="mb-3">
+                    <label for="content" class="form-label">내용</label>
+                    <textarea cols="50" rows="10" id="content" th:field="*{content}"
+                              th:errorclass="field-error" class="form-control">
 
             </textarea>
-            <div th:errors="*{content}">내용 기입 오류</div>
+                    <div class="field-error" th:errors="*{content}">내용 기입 오류</div>
+                </div>
+                <div>
+                    <input type="hidden" th:value="${forum.id}" id="forumId" name="forumId">
+                </div>
+                <button type="submit" class="btn btn-light">올리기</button>
+            </form>
         </div>
-        <div>
-            <input type="hidden" th:value="${forum.id}" id="forumId" name="forumId">
+
+        <div class="col col-lg">
+            <div th:if="${user!=null && (user.userType==user.userType.ADMIN || isManager)}">
+                <a th:href="@{/forum/{forumId}/category/new(forumId=${forum.id})}">카테고리 생성</a>
+            </div>
+            <div>
+                <ul class="pagination pagination-sm">
+                    <li th:each="category:${categories}" class="page-item">
+                        <a th:href="@{/forum/{forumId}/category/{categoryId}(forumId=${forum.id}, categoryId=${category.id})}" class="page-link">
+                            <p class="m-0" th:text="${category.categoryName}">카테고리</p>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div th:each="post:${posts}" class="row mt-2">
+                <hr>
+                <div class="mb-0">
+                    <a th:href="@{/forum/{forumId}/post/{postId}(postId=${post.id}, forumId=${forum.id})}"
+                       class="text-decoration-none">
+                        <p class="h5 fw-bold text-muted" th:text="${post.title}" >제목</p>
+                    </a>
+                    </p>
+                </div>
+                <div class="row justify-content-start">
+                    <div class="col col-sm-2"><p class="overflow-hidden" th:text="${(post.postType!=postType[0])?post.anonymousUserName:post.user.userName}"></p></div>
+                    <div class="col col-sm-3">
+                        <p class="fw-lighter" th:text="${{post.lastModifiedDate.withNano(0)}}"></p>
+                    </div>
+                </div>
+                <div th:if="${post.imageFile}"><img th:src="|/image/${post.imageFile.storeFileName}|" width="300"
+                                                    height="300"/></div>
+                <div class="row overflow-hidden"><p nl2br:text="${post.content}"></p>
+                </div>
+            </div>
+
+            <!--페이지-->
+            <hr>
+            <div class="container  mt-1">
+                <ul class="list-inline d-flex justify-content-center">
+                    <li th:if="${pageCreator.prev}" class="list-inline-item">
+                        <a th:href="@{{currentUrl}?page={start}(currentUrl=${currentUrl}, start=${(pageCreator.start)-1})}"
+                           class="text-decoration-none">&lt;</a></li>
+
+                    <li th:each="iter:${#numbers.sequence(pageCreator.start,pageCreator.end)}" class="list-inline-item">
+                        <a th:href="@{{currentUrl}?page={num}(currentUrl=${currentUrl}, num=${iter})}" th:text="${iter}"
+                           class="text-decoration-none"></a>
+                    </li>
+
+
+                    <li th:if="${pageCreator.next}" class="list-inline-item">
+                        <a th:href="@{{currentUrl}?page={end}(currentUrl=${currentUrl}, end=${(pageCreator.end)+1})}"
+                           class="text-decoration-none">&gt;</a></li>
+                </ul>
+            </div>
         </div>
-        <button type="submit">올리기</button>
-    </form>
-</div>
-    <div th:each="post:${posts}">
-        <div>
-            <a th:href="@{/forum/{forumId}/post/{postId}(postId=${post.id}, forumId=${forum.id})}"
-               th:text="'Title :' + ${post.title}"></a>
-        </div>
-        <div th:text="'Writer:' + ${(post.postType!=postType[0])?post.anonymousUserName:post.user.userName}"></div>
-        <div th:text="'Date  :' + ${{post.lastModifiedDate.withNano(0)}}"></div>
-        <div th:if="${post.imageFile}"><img th:src="|/image/${post.imageFile.storeFileName}|" width="300" height="300"/></div>
-        <div th:text="'>>>' + ${post.content}"></div>
+
     </div>
-<ul>
-    <li th:if="${pageCreator.prev}"><a th:href="@{{currentUrl}?page={start}(currentUrl=${currentUrl}, start=${(pageCreator.start)-1})}">prev</a></li>
-
-    <li th:each="iter:${#numbers.sequence(pageCreator.start,pageCreator.end)}">
-        <a th:href="@{{currentUrl}?page={num}(currentUrl=${currentUrl}, num=${iter})}" th:text="${iter}"></a>
-    </li>
-
-
-    <li th:if="${pageCreator.next}"><a th:href="@{{currentUrl}?page={end}(currentUrl=${currentUrl}, end=${(pageCreator.end)+1})}">next</a></li>
-</ul>
+</div>
 </body>
 </html>

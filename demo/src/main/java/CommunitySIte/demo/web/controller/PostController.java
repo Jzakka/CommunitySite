@@ -23,9 +23,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
@@ -40,16 +37,6 @@ public class PostController {
     private final PostService postService;
     private final ForumService forumService;
     private final FileStore fileStore;
-
-    @ModelAttribute("forumId")
-    public Long forumId(@PathVariable Long forumId) {
-        return forumId;
-    }
-
-    @ModelAttribute("forumName")
-    public String forumName(@PathVariable Long forumId) {
-        return forumService.showForum(forumId).getForumName();
-    }
 
     @ModelAttribute("postType")
     public PostType[] postType() {
@@ -126,15 +113,14 @@ public class PostController {
                          @Login Users user,
                          @ModelAttribute("postForm") @Validated PostUpdateForm postForm,
                          BindingResult bindingResult) throws IOException {
-        Post post = postService.findPost(postId);
+        Post post = postService.findPostAndForum(postId);
         boolean accessible = AccessibilityChecker.accessible(user, post);
         if (!accessible) {
-            //return "redirect:/forum/{forumId}/post/{postId}";
             throw new NotAuthorizedException("인증되지 않은 사용자 접근입니다.");
         }
         boolean updatable = updatable(user, postForm, bindingResult, post);
         if (!updatable) {
-            return "redirect:/forum/{forumId}/post/{postId}";
+            return "redirect:/forum/"+post.getForum().getId()+"/post/{postId}";
         }
 
         if (bindingResult.hasErrors()) {
@@ -143,7 +129,7 @@ public class PostController {
         }
 
         postService.update(postId, postForm.title, fileStore.storeFile(postForm.imageFile), postForm.content);
-        return "redirect:/forum/{forumId}/post/{postId}";
+        return "redirect:/forum/"+post.getForum().getId()+"/post/{postId}";
     }
 
     private boolean updatable(Users user, PostUpdateForm postForm, BindingResult bindingResult, Post post) {
@@ -176,17 +162,18 @@ public class PostController {
     @GetMapping("/{postId}/delete")
     public String enterPasswordOrNot(@PathVariable Long postId,
                                      @Login Users user, Model model) {
-        Post post = postService.findPost(postId);
+        Post post = postService.findPostAndForum(postId);
+        Long forumId = post.getForum().getId();
         boolean accessible = AccessibilityChecker.accessible(user, post);
         if (!accessible) {
-            //return "redirect:/forum/{forumId}/post/{postId}";
             throw new NotAuthorizedException("인증되지 않은 사용자 접근입니다.");
         }
 
         if (post.getPostType() == PostType.NORMAL) {
             postService.delete(postId);
-            return "redirect:/forum/{forumId}";
+            return "redirect:/forum/"+forumId;
         } else {
+            model.addAttribute("forumId", forumId);
             model.addAttribute("password", "");
             return "posts/enter-password";
         }
@@ -197,10 +184,10 @@ public class PostController {
                          @Login Users user,
                          @ModelAttribute(name = "password") String password,
                          BindingResult bindingResult){
-        Post post = postService.findPost(postId);
+        Post post = postService.findPostAndForum(postId);
+        Long forumId = post.getForum().getId();
         boolean accessible = AccessibilityChecker.accessible(user, post);
         if (!accessible) {
-            //return "redirect:/forum/{forumId}/post/{postId}";
             throw new NotAuthorizedException("인증되지 않은 사용자 접근입니다.");
         }
         if(!StringUtils.hasText(password)||(post.getPassword() != null && !post.getPassword().equals(password))){
@@ -215,18 +202,21 @@ public class PostController {
         }
 
         postService.delete(postId);
-        return "redirect:/forum/{forumId}";
+        return "redirect:/forum/"+forumId;
     }
 
     @GetMapping("/{postId}")
     public String post(@PathVariable Long postId,
                        @Login Users user,
                        Model model) {
-        Post post = postService.showPost(postId);
+        Post post = postService.showPostWithComment(postId);
 
         log.info("loginUser={}", user);
         log.info("post.user={}", post.getUser());
         post.increaseViews();
+
+        model.addAttribute("forumId", post.getForum().getId());
+        model.addAttribute("forumName", post.getForum().getForumName());
         model.addAttribute("post", post);
         model.addAttribute("commentForm", new CommentController.CommentForm());
 
@@ -241,10 +231,10 @@ public class PostController {
 
         boolean accessible = AccessibilityChecker.accessible(user, post);
         if (!accessible) {
-            //return "redirect:/forum/{forumId}/post/{postId}";
             throw new NotAuthorizedException("인증되지 않은 사용자 접근입니다.");
         }
 
+        model.addAttribute("forumId", post.getForum().getId());
         model.addAttribute("postId", postId);
         model.addAttribute("postForm", new PostUpdateForm(post));
 

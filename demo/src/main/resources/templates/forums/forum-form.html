@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:nl2br="https://github.com/bufferings/thymeleaf-extras-nl2br">
+<head th:replace="fragments/header :: header">
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+<div th:replace="fragments/bodyHeader :: bodyHeader"/>
+<form th:action="@{/forum/new}" method="post" th:object="${forumForm}">
+    <label for="forumName">새 포럼 명</label>
+    <input type="text" id="forumName" th:field="*{forumName}">
+    <div th:errors="*{forumName}">포럼 이름 기입 오류</div>
+    <div>
+        <select th:field="*{forumType}">
+            <option th:each="forumType:${forumTypes}" th:value="${forumType}"
+                    th:text="${forumType}">일반</option>
+        </select>
+    </div>
+    <button type="submit">포럼생성</button>
+</form>
+</body>
+</html>

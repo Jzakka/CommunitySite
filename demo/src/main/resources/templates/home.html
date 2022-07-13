@@ -1,36 +1,62 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
+<head th:replace="fragments/header :: header">
     <meta charset="UTF-8">
     <title>Home</title>
 </head>
 <body>
-<h2><a th:href >CommunitySite</a></h2>
-<div th:if="${user == null}">
-    <form role="form" action="/login" th:action="@{/login}" th:object="${loginForm}" method="post">
-        <label for="loginId">아이디</label>
-        <input type="text" th:field="*{loginId}" id="loginId" >
-        <label for="password">비밀번호</label>
-        <input type="password" th:field="*{password}" id="password">
-        <button type="submit">로그인</button>
-    </form>
-    <a href="/users/new">회원가입</a>
+<div th:replace="fragments/bodyHeader :: bodyHeader"/>
+
+<div class="container" style="text-align: center">
+    <div th:if="${user == null}">
+        <form role="form" action="/login" th:action="@{/login}" th:object="${loginForm}" method="post">
+            <div class="mb-2">
+                <label for="loginId" class="form-label">아이디</label>
+                <input type="text" th:field="*{loginId}" id="loginId" th:errorclass="field-error" class="form-control form-control-sm">
+                <div class="field-error" th:errors="*{loginId}"></div>
+            </div>
+            <div class="mb-2">
+                <label for="password" class="form-label">비밀번호</label>
+                <input type="password" th:field="*{password}" id="password" th:errorclass="field-error" class="form-control form-control-sm">
+                <div class="field-error" th:errors="*{password}"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">로그인</button>
+            <a href="/users/new" class="btn">회원가입</a>
+        </form>
+    </div>
+    <div th:if="${user != null}">
+        <p th:text="|${user.userName} 님 안녕하세요!|" class="text-break"></p>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn">로그아웃</button>
+        </form>
+    </div>
 </div>
-<div th:if="${user != null}">
-    <p th:text="|${user.userName} 님 안녕하세요!|"></p>
-    <form th:action="@{/logout}" method="post">
-        <button type="submit">로그아웃</button>
-    </form>
-</div>
-<h3>Forum List</h3>
-<div>
-    <ul>
-        <li th:each="forum :${forums}">
-            <a th:href="@{/forum/{id}(id=${forum.id})}" th:text="${forum.getForumName()}">forum</a>
-            <a th:if="${(forum.forumType==forum.forumType?.MINOR && user!=null && user.userType==user.userType?.ADMIN)}" th:href="@{/forum/{id}/manager(id=${forum.id})}">
+
+
+<div class="jumbotron">
+    <h3>Forum List</h3>
+    <div>
+        <div th:each="forum :${forums}">
+            <a th:href="@{/forum/{id}(id=${forum.id})}" th:text="${forum.getForumName()}">
+
+            </a>
+            <a th:if="${(forum.forumType==forum.forumType?.MINOR && user!=null && user.userType==user.userType?.ADMIN)}"
+               th:href="@{/forum/{id}/manager(id=${forum.id})}"
+               class="list-group-item list-group-item-action">
                 매니저위임</a>
-        </li>
-    </ul>
+        </div>
+
+        <ul class="list-group list-group-flush">
+            <li  class="list-group-item">
+                <a
+                   class="list-group-item list-group-item-action" >forum</a>
+
+            </li>
+        </ul>
+        <a th:if="${user!=null && user.userType==user.userType?.ADMIN}" th:href="@{/forum/new}" class="btn btn-secondary">
+            포럼 생성
+        </a>
+    </div>
 </div>
 </body>
 </html>

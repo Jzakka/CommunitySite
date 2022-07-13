@@ -51,26 +51,26 @@ public class CategoryController {
                                       Model model,
                                       Criteria criteria){
         criteria.setPage(page==null?1:page);
-        Category category = categoryService.findOne(categoryId);
-        Forum forum = forumService.showForum(forumId);
-        List<Post> posts = categoryService.showPostsByCategory(categoryId);
+        Category category = categoryService.findWithForumAndPosts(categoryId);
+        //Forum forum = forumService.showForum(forumId);
+        //List<Post> posts = categoryService.showPostsByCategory(categoryId);
 
         PageCreator pageCreator = new PageCreator();
         pageCreator.setCriteria(criteria);
-        pageCreator.setTotalCount(posts.size());
+        pageCreator.setTotalCount(category.getPosts().size());
         log.info("pageCreator={}", pageCreator);
 
         model.addAttribute("postForm",new PostController.PostFeedForm());
-        model.addAttribute("forum", forum);
+        model.addAttribute("forum", category.getForum());
         model.addAttribute("categories", forumService.showCategories(forumId));
 
-        List<Post> list = forumService.showPostsByPage(criteria, forum, category);
+        List<Post> list = forumService.showPostsByPage(criteria, category.getForum(), category);
 
         model.addAttribute("currentUrl", request.getRequestURI());
         model.addAttribute("posts", list);
         model.addAttribute("pageCreator", pageCreator);
 
-        boolean isManager = isManager(loginUser, forum);
+        boolean isManager = isManager(loginUser, category.getForum());
         model.addAttribute("isManager", isManager);
 
         return "forums/forum";
@@ -118,7 +118,7 @@ public class CategoryController {
 
 
     public static boolean isManager(Users loginUser, Forum forum) {
-        if(loginUser.getUserType()==UserType.ADMIN) return true;
+        if(loginUser!=null&&loginUser.getUserType()==UserType.ADMIN) return true;
         boolean isManager = false;
         List<ForumManager> forumManagers = forum.getForumManagers();
         for (ForumManager forumManager : forumManagers) {

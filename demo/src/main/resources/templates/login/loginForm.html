@@ -1,26 +1,35 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
+<head th:replace="fragments/header :: header">
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Home</title>
 </head>
 <body>
-<div>
-    <form role="form" action="/login" th:action="@{/login}" th:object="${loginForm}" method="post">
-        <label for="loginId">아이디</label>
-        <input type="text" th:field="*{loginId}" id="loginId" >
-        <div th:errors="*{loginId}">아이디 오류</div>
-        <label for="password">비밀번호</label>
-        <input type="password" th:field="*{password}" id="password">
-        <div th:errors="*{password}">비밀번호 오류</div>
+<div th:replace="fragments/bodyHeader :: bodyHeader"/>
+<div class="container">
+    <form action="/login" th:action="@{/login}" th:object="${loginForm}" method="post">
+        <label for="loginId" class="form-label">아이디</label>
+        <input type="text" th:field="*{loginId}" id="loginId" th:errorclass="field-error" class="form-control">
+        <div class="field-error" th:errors="*{loginId}">아이디 오류</div>
+        <label for="password" class="form-label">비밀번호</label>
+        <input type="password" th:field="*{password}" id="password" th:errorclass="field-error" class="form-control">
+        <div class="field-error" th:errors="*{password}">비밀번호 오류</div>
 
-        <div th:if="${#fields.hasGlobalErrors()}">
+        <div class="global-error" th:if="${#fields.hasGlobalErrors()}">
             <p th:each="err:${#fields.globalErrors()}" th:text="${err}">오류 메시지</p>
         </div>
-        <button type="submit">로그인</button>
+        <div class="row gap-1">
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">로그인</button>
+            </div>
+            <div class="col d-grid gap-2">
+                <a href="/users/new" class="btn btn-outline-secondary">회원가입</a>
+            </div>
+            <div class="col d-grid gap-2">
+                <button type="button" th:onclick="|location.href='@{/}'|" class="btn btn-secondary">취소</button>
+            </div>
+        </div>
     </form>
-    <a href="/users/new">회원가입</a>
-    <button type="button" th:onclick="|location.href='@{/}'|">취소</button>
 </div>
 </body>
 </html>

@@ -28,7 +28,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static CommunitySIte.demo.web.controller.ForumController.modelSetForumInfo;
 
@@ -60,12 +62,8 @@ public class PostController {
     @PostMapping("/new")
     public String feed(@ModelAttribute("postFeedForm") @Validated PostFeedForm postFeedForm,
                        BindingResult bindingResult,
-                       HttpServletRequest request,
-                       @RequestParam(required = false) Integer page,
-                       @Login  Users loginUser,
-                       @PathVariable Long forumId,
-                       Criteria criteria,
-                       Model model) throws IOException {
+                       RedirectAttributes redirectAttributes,
+                       @Login  Users loginUser) throws IOException {
         //일반 사용자냐 유동이냐에 따라 투고 작성자 이름이 달라야함
         //일반 사용자
         //유동 사용자
@@ -86,9 +84,16 @@ public class PostController {
             //리다이렉트 해보려고 했는데 무슨짓을 해도 BindingResult가 안넘어감
             //addFlashAttribute로 해봣는데 안넘어감
             //걍 절대 안됨 안되는건 안됨
+            /**
+             *찾아봤는데 컨트롤러는 호출 될 때마다 bindingResult를 덮어씌우는 듯
+             * 그래서 ForumController로 가도 bindingResult의 결과는 다시 덮어씌워지나봄'
+             * 실제 구글 검색해봐도 같은 컨트롤러 내에서의 예시만 있고 다른 컨트롤러로 가는 건 없다
+             * 결국 해시맵에 에러 다시 담아서 리다이렉트...
+             * 썩쎆쓰
+             */
             //그냥 무식하게 모델에 때려박고 뷰화면 보여주는걸로
             //------개선 필요---------
-            Forum forum = forumService.showForumWithManager(forumId);
+            /*Forum forum = forumService.showForumWithManager(forumId);
             Integer postsCount = forumService.getPostsCount(forum);
             List<Category> categories = forumService.showCategories(forumId);
 
@@ -101,8 +106,26 @@ public class PostController {
             ForumController.paging(request, model, pageCreator, list);
 
             AccessibilityChecker.checkIsManager(loginUser, model, forum);
+*/
+            //직접 에러 쑤셔박기
+            Map<String, String> errors = new HashMap<>();
 
-            return "forums/forum";
+            if (bindingResult.hasFieldErrors("title")) {
+                errors.put("title", bindingResult.getFieldError("title").getDefaultMessage());
+            }
+            if (bindingResult.hasFieldErrors("username")) {
+                errors.put("username", bindingResult.getFieldError("username").getDefaultMessage());
+            }
+            if (bindingResult.hasFieldErrors("password")) {
+                errors.put("password", bindingResult.getFieldError("password").getDefaultMessage());
+            }
+            if (bindingResult.hasFieldErrors("content")) {
+                errors.put("content", bindingResult.getFieldError("content").getDefaultMessage());
+            }
+
+            redirectAttributes.addFlashAttribute("errors", errors);
+            return "redirect:/forum/{forumId}";
+//            return "forums/forum";
         }
         if ((loginUser == null)) {
             postService.feedPost(postFeedForm.forumId, postFeedForm.title, fileStore.storeFile(postFeedForm.imageFile),postFeedForm.username,

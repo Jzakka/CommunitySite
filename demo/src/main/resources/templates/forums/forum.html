@@ -15,7 +15,8 @@
 <div class="bg-secondary bg-opacity-10 p-2" style="min-width: 1000px">
     <div class="row pt-3">
         <div class="col">
-            <form th:action="@{/forum/{forumId}/post/new(forumId=${forum.id})}" th:object="${postFeedForm}" method="post"
+            <form th:action="@{/forum/{forumId}/post/new(forumId=${forum.id})}" th:object="${postFeedForm}"
+                  method="post"
                   enctype="multipart/form-data">
                 <input type="hidden" id="posts" name="posts" th:value="${posts}">
                 <input type="hidden" id="categories" name="categories" th:value="${categories}">
@@ -23,21 +24,27 @@
                 <div class="mb-3">
                     <label for="title" class="form-label">제목</label>
                     <input type="text" id="title" th:field="*{title}"
-                           th:errorclass="field-error" class="form-control">
-                    <div class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">제목 기입 오류</div>
+                           th:classappend="${errors?.containsKey('title')}?'field-error':_" class="form-control">
+                    <div class="field-error" th:if="${errors?.containsKey('title')}"
+                         th:text="${errors['title']}">제목 기입 오류
+                    </div>
                 </div>
                 <div class="row mb-3">
                     <div th:if="${user==null}" class="col">
                         <label for="username" class="form-label">작성자</label>
                         <input type="text" id="username" th:field="*{username}"
-                               th:errorclass="field-error" class="form-control">
-                        <div class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">작성자 이름 기입 오류</div>
+                               th:classappend="${errors?.containsKey('username')}?'field-error':_" class="form-control">
+                        <div class="field-error" th:if="${errors?.containsKey('username')}"
+                             th:text="${errors['username']}">작성자 이름 기입 오류
+                        </div>
                     </div>
                     <div th:if="${user==null}" class="col">
                         <label for="password" class="form-label">비밀번호</label>
                         <input type="password" id="password" th:field="*{password}"
-                               th:errorclass="field-error" class="form-control">
-                        <div class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">비밀번호 기입오류</div>
+                               th:classappend="${errors?.containsKey('password')}?'field-error':_" class="form-control">
+                        <div class="field-error" th:if="${errors?.containsKey('password')}"
+                             th:text="${errors['password']}">비밀번호 기입오류
+                        </div>
                     </div>
                 </div>
                 <!--select box 방식 -->
@@ -56,11 +63,12 @@
                 </div>
                 <div class="mb-3">
                     <label for="content" class="form-label">내용</label>
-                    <textarea cols="50" rows="10" id="content" th:field="*{content}"
-                              th:errorclass="field-error" class="form-control">
+                    <textarea cols="50" rows="10" id="content" th:field="*{content}" th:classappend="${errors?.containsKey('content')}?'field-error':_" class="form-control">
 
             </textarea>
-                    <div class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}">내용 기입 오류</div>
+                    <div class="field-error" th:if="${errors?.containsKey('content')}"
+                         th:text="${errors['content']}">내용 기입 오류
+                    </div>
                 </div>
                 <div>
                     <input type="hidden" th:value="${forum.id}" id="forumId" name="forumId">
@@ -71,12 +79,14 @@
 
         <div class="col col-lg">
             <div th:if="${user!=null && (user.userType==user.userType.ADMIN || isManager)}">
-                <a th:href="@{/forum/{forumId}/category/new(forumId=${forum.id})}" class="btn btn-outline-info btn-sm mb-1">카테고리 생성</a>
+                <a th:href="@{/forum/{forumId}/category/new(forumId=${forum.id})}"
+                   class="btn btn-outline-info btn-sm mb-1">카테고리 생성</a>
             </div>
             <div>
                 <ul class="pagination pagination-sm">
                     <li th:each="category:${categories}" class="page-item">
-                        <a th:href="@{/forum/{forumId}/category/{categoryId}(forumId=${forum.id}, categoryId=${category.id})}" class="page-link">
+                        <a th:href="@{/forum/{forumId}/category/{categoryId}(forumId=${forum.id}, categoryId=${category.id})}"
+                           class="page-link">
                             <p class="m-0" th:text="${category.categoryName}">카테고리</p>
                         </a>
                     </li>
@@ -88,12 +98,14 @@
                 <div class="mb-0">
                     <a th:href="@{/forum/{forumId}/post/{postId}(postId=${post.id}, forumId=${forum.id})}"
                        class="text-decoration-none">
-                        <p class="h5 fw-bold text-muted" th:text="${post.title}" >제목</p>
+                        <p class="h5 fw-bold text-muted" th:text="${post.title}">제목</p>
                     </a>
                     </p>
                 </div>
                 <div class="row justify-content-start">
-                    <div class="col col-sm-2"><p class="overflow-hidden" th:text="${(post.postType!=postType[0])?post.anonymousUserName:post.user.userName}"></p></div>
+                    <div class="col col-sm-2"><p class="overflow-hidden"
+                                                 th:text="${(post.postType!=postType[0])?post.anonymousUserName:post.user.userName}"></p>
+                    </div>
                     <div class="col col-sm-3">
                         <p class="fw-lighter" th:text="${{post.lastModifiedDate.withNano(0)}}"></p>
                     </div>

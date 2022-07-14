@@ -1,20 +1,20 @@
 package CommunitySIte.demo.web.controller;
 
-import CommunitySIte.demo.domain.Forum;
-import CommunitySIte.demo.domain.Post;
-import CommunitySIte.demo.domain.PostType;
-import CommunitySIte.demo.domain.Users;
+import CommunitySIte.demo.domain.*;
 import CommunitySIte.demo.domain.file.FileStore;
 import CommunitySIte.demo.exception.NotAuthorizedException;
 import CommunitySIte.demo.service.ForumService;
 import CommunitySIte.demo.service.PostService;
 import CommunitySIte.demo.web.argumentresolver.Login;
 import CommunitySIte.demo.web.controller.access.AccessibilityChecker;
+import CommunitySIte.demo.web.controller.page.Criteria;
+import CommunitySIte.demo.web.controller.page.PageCreator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.Conventions;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -22,11 +22,15 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.List;
+
+import static CommunitySIte.demo.web.controller.ForumController.modelSetForumInfo;
 
 @Slf4j
 @Controller
@@ -53,53 +57,58 @@ public class PostController {
         return loginUser;
     }
 
-    /**
-     * 이미지 가능하게 변경 필요
-     * @param postForm
-     * @param bindingResult
-     * @param loginUser
-     * @param forumId
-     * @param model
-     * @return
-     */
     @PostMapping("/new")
-    public String feed(@ModelAttribute("postForm") @Validated PostFeedForm postForm,
+    public String feed(@ModelAttribute("postFeedForm") @Validated PostFeedForm postFeedForm,
                        BindingResult bindingResult,
+                       HttpServletRequest request,
+                       @RequestParam(required = false) Integer page,
                        @Login  Users loginUser,
                        @PathVariable Long forumId,
+                       Criteria criteria,
                        Model model) throws IOException {
         //일반 사용자냐 유동이냐에 따라 투고 작성자 이름이 달라야함
         //일반 사용자
         //유동 사용자
         if (loginUser == null) {
-            if(!StringUtils.hasText(postForm.getUsername())){
+            if(!StringUtils.hasText(postFeedForm.getUsername())){
                 bindingResult.rejectValue("username", "username","비회원 투고는 이름기입이 필수입니다.");
             }
-            if(!StringUtils.hasText(postForm.getPassword())){
+            if(!StringUtils.hasText(postFeedForm.getPassword())){
                 bindingResult.rejectValue("password", "password","비회원 투고는 비밀번호기입이 필수입니다.");
             }
         }
 
-        log.info("postForm = {}", postForm);
+        log.info("postFeedForm = {}", postFeedForm);
         if (bindingResult.hasErrors()) {
-            log.info("bindingResult = {}", bindingResult);
+            log.info("PostController.bindingResult = {}", bindingResult.hashCode());
 
             //잘못 기입 될 때마다 쿼리로 포럼정보를 갱신해야하는 매우 비효율적인 구조.
+            //리다이렉트 해보려고 했는데 무슨짓을 해도 BindingResult가 안넘어감
+            //addFlashAttribute로 해봣는데 안넘어감
+            //걍 절대 안됨 안되는건 안됨
+            //그냥 무식하게 모델에 때려박고 뷰화면 보여주는걸로
             //------개선 필요---------
-            Forum forum = forumService.showForum(forumId);
-            List<Post> posts = forumService.showPosts(forumId);
-            model.addAttribute("postForm",postForm);
-            model.addAttribute("forum", forum);
-            model.addAttribute("posts", posts);
-            model.addAttribute("categories", forumService.showCategories(forumId));
+            Forum forum = forumService.showForumWithManager(forumId);
+            Integer postsCount = forumService.getPostsCount(forum);
+            List<Category> categories = forumService.showCategories(forumId);
+
+            PageCreator pageCreator = PageCreator.newPageCreator(page, criteria, postsCount);
+
+            modelSetForumInfo(model, postFeedForm, forum, categories);
+
+            List<Post> list = forumService.showPostsByPage(criteria, forum);
+
+            ForumController.paging(request, model, pageCreator, list);
+
+            AccessibilityChecker.checkIsManager(loginUser, model, forum);
 
             return "forums/forum";
         }
         if ((loginUser == null)) {
-            postService.feedPost(postForm.forumId, postForm.title, fileStore.storeFile(postForm.imageFile),postForm.username,
-                    postForm.categoryId, postForm.password, postForm.content);
+            postService.feedPost(postFeedForm.forumId, postFeedForm.title, fileStore.storeFile(postFeedForm.imageFile),postFeedForm.username,
+                    postFeedForm.categoryId, postFeedForm.password, postFeedForm.content);
         } else {
-            postService.feedPost(postForm.forumId, postForm.title, fileStore.storeFile(postForm.imageFile) , loginUser, postForm.categoryId, postForm.content);
+            postService.feedPost(postFeedForm.forumId, postFeedForm.title, fileStore.storeFile(postFeedForm.imageFile) , loginUser, postFeedForm.categoryId, postFeedForm.content);
         }
 
         return "redirect:/forum/{forumId}";

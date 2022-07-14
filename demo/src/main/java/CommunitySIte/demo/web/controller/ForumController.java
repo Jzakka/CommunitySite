@@ -25,6 +25,8 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Optional;
 
+import static CommunitySIte.demo.web.controller.PostController.*;
+
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -62,6 +64,7 @@ public class ForumController {
     @GetMapping("/{id}")
     public String listForum(@PathVariable("id") Long forumId,
                             @Login Users loginUser,
+                            @ModelAttribute(name = "postFeedForm") PostFeedForm postFeedForm,
                             HttpServletRequest request,
                             @RequestParam(required = false) Integer page,
                             Model model,
@@ -72,7 +75,7 @@ public class ForumController {
 
         PageCreator pageCreator = PageCreator.newPageCreator(page, criteria, postsCount);
 
-        modelSetForumInfo(model, forum, categories);
+        modelSetForumInfo(model, postFeedForm, forum, categories);
 
         List<Post> list = forumService.showPostsByPage(criteria, forum);
 
@@ -89,8 +92,8 @@ public class ForumController {
         model.addAttribute("pageCreator", pageCreator);
     }
 
-    public static void modelSetForumInfo(Model model, Forum forum, List<Category> categories) {
-        model.addAttribute("postForm", new PostController.PostFeedForm());
+    public static void modelSetForumInfo(Model model, PostFeedForm postForm, Forum forum, List<Category> categories) {
+        model.addAttribute("postForm", postForm);
         model.addAttribute("forum", forum);
         model.addAttribute("categories", categories);
     }

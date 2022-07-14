@@ -51,6 +51,7 @@ public class CategoryController {
     @GetMapping("/{categoryId}")
     public String showPostsByCategory(@PathVariable Long forumId,
                                       @PathVariable Long categoryId,
+                                      PostController.PostFeedForm postForm,
                                       @RequestParam(required = false) Integer page,
                                       @Login Users loginUser,
                                       HttpServletRequest request,
@@ -62,7 +63,7 @@ public class CategoryController {
 
         PageCreator pageCreator = newPageCreator(page, criteria, postsCount);
 
-        modelSetForumInfo(model,category.getForum(),categories);
+        modelSetForumInfo(model,postForm,category.getForum(),categories);
 
         List<Post> list = forumService.showPostsByPage(criteria, category.getForum(), category);
 

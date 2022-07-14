@@ -1,38 +1,41 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
+<head th:replace="fragments/header :: header">
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Home</title>
 </head>
 <body>
-<div>
+<div th:replace="fragments/bodyHeader :: bodyHeader"/>
+<div class="container">
     <form action="post.html" th:action th:object="${postForm}" enctype="multipart/form-data" method="post">
         <input type="hidden" id="id" name="id" th:value="${postId}">
         <div>
-            <label for="title">제목</label>
-            <input id="title" type="text" th:field="*{title}">
-            <div th:errors="*{title}">제목 기입 오류</div>
+            <label for="title" class="form-label">제목</label>
+            <input id="title" type="text" class="form-control" th:errorclass="field-error" th:field="*{title}">
+            <div th:errors="*{title}" class="field-error">제목 기입 오류</div>
         </div>
         <input type="hidden" id="postType" name="postType" th:value="*{postType}">
         <div th:if="${postForm.postType!=postForm.postType.NORMAL}">
-            <label for="password">비밀번호</label>
-            <input id="password" type="password" th:field="*{password}">
-            <div th:errors="*{password}">비밀 번호 기입 오류</div>
+            <label for="password" class="form-label">비밀번호</label>
+            <input id="password" type="password" class="form-control" th:errorclass="field-error" th:field="*{password}">
+            <div th:errors="*{password}" class="field-error">비밀 번호 기입 오류</div>
         </div>
         <div>
-            <label for="imageFile">이미지 파일 추가</label>
-            <input type="file" id="imageFile" th:field="*{imageFile}">
+            <label for="imageFile" class="form-label">이미지 파일 추가</label>
+            <input type="file" id="imageFile" th:field="*{imageFile}" class="form-control">
         </div>
-        <div>
-            <label for="content">내용</label>
-            <textarea id="content" cols="50" rows="10" th:field="*{content}">
-
+        <div class="mb-2">
+            <label for="content" class="form-label">내용</label>
+            <textarea id="content" cols="50" rows="10" class="form-control" th:errorclass="field-error" th:field="*{content}">
+                내용
             </textarea>
-            <div th:errors="*{content}">내용 기입 오류</div>
+            <div th:errors="*{content}" class="field-error">내용 기입 오류</div>
         </div>
-        <button type="submit">수정</button>
-        <button type="button" th:onclick="|location.href='@{/forum/{forumId}/post/{postId}(forumId=${forumId}, postId=${postId})}'|">취소</button>
-
+        <div class="gap-2">
+            <button type="submit" class="btn btn-primary">수정</button>
+            <button type="button" class="btn btn-secondary" th:onclick="|location.href='@{/forum/{forumId}/post/{postId}(forumId=${forumId}, postId=${postId})}'|">취소</button>
+        </div>
+        <input type="hidden" id="forumId" name="forumId" th:value="${forumId}">
     </form>
 </div>
 </body>

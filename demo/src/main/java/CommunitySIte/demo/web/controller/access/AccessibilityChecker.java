@@ -1,9 +1,10 @@
 package CommunitySIte.demo.web.controller.access;
 
-import CommunitySIte.demo.domain.Accessible;
-import CommunitySIte.demo.domain.PostType;
-import CommunitySIte.demo.domain.Users;
+import CommunitySIte.demo.domain.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ui.Model;
+
+import java.util.List;
 
 @Slf4j
 public class AccessibilityChecker {
@@ -28,5 +29,24 @@ public class AccessibilityChecker {
             }
         }
         return true;
+    }
+
+    public static void checkIsManager(Users loginUser, Model model, Forum forum) {
+        boolean isManager = isManager(loginUser, forum);
+        model.addAttribute("user", loginUser);
+        model.addAttribute("isManager", isManager);
+    }
+
+    public static boolean isManager(Users loginUser, Forum forum) {
+        if(loginUser!=null&&loginUser.getUserType()== UserType.ADMIN) return true;
+        boolean isManager = false;
+        List<ForumManager> forumManagers = forum.getForumManagers();
+        for (ForumManager forumManager : forumManagers) {
+            if (forumManager.getUser().equals(loginUser)) {
+                isManager = true;
+                break;
+            }
+        }
+        return isManager;
     }
 }

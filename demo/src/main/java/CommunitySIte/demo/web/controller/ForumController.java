@@ -5,6 +5,7 @@ import CommunitySIte.demo.service.ForumManageService;
 import CommunitySIte.demo.service.ForumService;
 import CommunitySIte.demo.service.UserService;
 import CommunitySIte.demo.web.argumentresolver.Login;
+import CommunitySIte.demo.web.controller.access.AccessibilityChecker;
 import CommunitySIte.demo.web.controller.page.Criteria;
 import CommunitySIte.demo.web.controller.page.PageCreator;
 import lombok.AllArgsConstructor;
@@ -24,8 +25,6 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Optional;
 
-import static CommunitySIte.demo.web.controller.CategoryController.isManager;
-
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -44,11 +43,6 @@ public class ForumController {
     @ModelAttribute("forumTypes")
     public ForumType[] forumTypes(){
         return ForumType.values();}
-
-    @ModelAttribute("user")
-    public Users user(@Login Users loginUser) {
-        return loginUser;
-    }
 
     @GetMapping("/new")
     public String forumForm(@ModelAttribute("forumForm") ForumForm form) {
@@ -72,34 +66,38 @@ public class ForumController {
                             @RequestParam(required = false) Integer page,
                             Model model,
                             Criteria criteria) {
-        criteria.setPage(page == null ? 1 : page);
-        log.info("criteria.page={}", criteria.getPage());
         Forum forum = forumService.showForumWithManager(forumId);
         Integer postsCount = forumService.getPostsCount(forum);
+        List<Category> categories = forumService.showCategories(forumId);
 
-        PageCreator pageCreator = new PageCreator();
-        pageCreator.setCriteria(criteria);
-        pageCreator.setTotalCount(postsCount);
+        PageCreator pageCreator = PageCreator.newPageCreator(page, criteria, postsCount);
 
-        model.addAttribute("postForm", new PostController.PostFeedForm());
-        model.addAttribute("forum", forum);
-        model.addAttribute("categories", forumService.showCategories(forumId));
+        modelSetForumInfo(model, forum, categories);
 
         List<Post> list = forumService.showPostsByPage(criteria, forum);
 
+        paging(request, model, pageCreator, list);
+
+        AccessibilityChecker.checkIsManager(loginUser, model, forum);
+
+        return "forums/forum";
+    }
+
+    public static void paging(HttpServletRequest request, Model model, PageCreator pageCreator, List<Post> list) {
         model.addAttribute("currentUrl", request.getRequestURL());
         model.addAttribute("posts", list);
         model.addAttribute("pageCreator", pageCreator);
-
-        boolean isManager = isManager(loginUser, forum);
-        model.addAttribute("isManager", isManager);
-
-        return "/forums/forum";
     }
 
+    public static void modelSetForumInfo(Model model, Forum forum, List<Category> categories) {
+        model.addAttribute("postForm", new PostController.PostFeedForm());
+        model.addAttribute("forum", forum);
+        model.addAttribute("categories", categories);
+    }
+
+
     @GetMapping("/{forumId}/manager")
-    public String managerForm(@PathVariable Long forumId,
-                              @ModelAttribute("managerForm") ManagerForm managerForm) {
+    public String managerForm(@ModelAttribute("managerForm") ManagerForm managerForm) {
         return "forums/manager-form";
     }
 
@@ -130,7 +128,7 @@ public class ForumController {
     @NoArgsConstructor
     @AllArgsConstructor
     private static class ManagerForm {
-        @NotBlank(message = "매니저를 설정할 유저ID를 입력해주세요")
+        @NotBlank(message = "매니저를 설정할 유저 ID를 입력해주세요")
         String userId;
     }
 

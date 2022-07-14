@@ -36,11 +36,6 @@ public class CommentRepository {
         return resultList;
     }
 
-    public void update(Long id, String content) {
-        Comment findComment = em.find(Comment.class, id);
-        findComment.update(content);
-    }
-
     public void delete(Long id) {
         em.createQuery("delete from Comment c where c.id = :id")
                 .setParameter("id", id)

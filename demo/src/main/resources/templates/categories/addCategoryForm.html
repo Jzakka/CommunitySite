@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
+<head th:replace="fragments/header :: header">
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Home</title>
 </head>
 <body>
-    <h2>카테고리 생성</h2>
-<form th:action="@{/forum/{forumId}/category/new(forumId=${forumId})}" th:object="${categoryForm}" method="post">
-    <label for="categoryName" th:text="카테고리이름">카테고리</label>
-    <input type="text" id="categoryName" th:field="*{categoryName}">
-    <div th:errors="*{categoryName}">카테고리명 기입 오류</div>
-    <button type="submit">카테고리생성</button>
+<div th:replace="fragments/bodyHeader :: bodyHeader"/>
+<p class="h2 text-center">카테고리 생성</p>
+<div class="container">
+    <form th:action="@{/forum/{forumId}/category/new(forumId=${forumId})}" th:object="${categoryForm}" method="post">
+        <label for="categoryName" th:text="카테고리이름" class="form-label">카테고리</label>
+        <input type="text" id="categoryName" th:field="*{categoryName}" class="form-control"
+               th:errorclass="field-error">
+        <div th:errors="*{categoryName}" class="field-error">카테고리명 기입 오류</div>
+        <button type="submit" class="btn btn-lg btn-outline-info mt-1">카테고리생성</button>
+    </form>
+</div>
 </form>
 </body>
 </html>

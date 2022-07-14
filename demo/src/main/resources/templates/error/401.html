@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header">
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Home</title>
 </head>
-<body>
-<a href="/" >홈으로</a>
-<p>권한이 없습니다.</p>
+<body class="container">
+<div th:replace="fragments/bodyHeader :: bodyHeader"/>
+<a href="/" class="text-decoration-none"><p class="text-body">홈으로</p></a>
+<p class="h2 text-danger">권한이 없습니다.</p>
 </body>
 </html>

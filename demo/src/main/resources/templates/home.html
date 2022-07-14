@@ -32,27 +32,26 @@
     </div>
 </div>
 
+<p class="h3 text-center">Forum List</p>
 
-<div class="jumbotron">
-    <h3>Forum List</h3>
-    <div>
-        <div th:each="forum :${forums}">
-            <a th:href="@{/forum/{id}(id=${forum.id})}" th:text="${forum.getForumName()}">
+<div class="jumbotron d-flex justify-content-center">
+    <div class="list-group m-3 gap-1" style="min-width: 1000px">
+        <div th:each="forum :${forums}" class="row align-middle">
+            <div class="col">
+                <a th:href="@{/forum/{id}(id=${forum.id})}" th:text="${forum.getForumName()}"
+                   class="list-group-item list-group-item-action list-group-item-primary">
+                    포럼명
+                </a>
+            </div>
 
-            </a>
-            <a th:if="${(forum.forumType==forum.forumType?.MINOR && user!=null && user.userType==user.userType?.ADMIN)}"
-               th:href="@{/forum/{id}/manager(id=${forum.id})}"
-               class="list-group-item list-group-item-action">
-                매니저위임</a>
+            <div class="col">
+                <a th:if="${(forum.forumType==forum.forumType?.MINOR && user!=null && user.userType==user.userType?.ADMIN)}"
+                   th:href="@{/forum/{id}/manager(id=${forum.id})}"
+                   class="list-group-item list-group-item-action">
+                    매니저위임
+                </a>
+            </div>
         </div>
-
-        <ul class="list-group list-group-flush">
-            <li  class="list-group-item">
-                <a
-                   class="list-group-item list-group-item-action" >forum</a>
-
-            </li>
-        </ul>
         <a th:if="${user!=null && user.userType==user.userType?.ADMIN}" th:href="@{/forum/new}" class="btn btn-secondary">
             포럼 생성
         </a>

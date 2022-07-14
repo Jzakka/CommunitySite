@@ -30,4 +30,10 @@ public class CategoryRepository {
                         " where c.id=:id", Category.class).setParameter("id", categoryId)
                 .getSingleResult();
     }
+
+    public void delete(Long categoryId) {
+        em.createQuery("delete from Category c" +
+                " where c.id = :id").setParameter("id", categoryId)
+                .executeUpdate();
+    }
 }

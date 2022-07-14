@@ -37,31 +37,14 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    private Users createAnonymousUser(String username) {
-        Users anonymousUser = new Users();
-        anonymousUser.setUserType(UserType.NONMEMBER);
-        anonymousUser.setUserName(username);
-        userRepository.save(anonymousUser);
-        return anonymousUser;
-    }
-
     public Comment findComment(Long id) {
         return commentRepository.findOne(id);
-    }
-
-    public List<Comment> listAllComment() {
-        return commentRepository.findAll();
     }
 
     public List<Comment> findByWriter(String name) {
         Users user = userRepository.findByName(name).get(0);
         List<Comment> comments = commentRepository.findByUser(user);
         return comments;
-    }
-
-    @Transactional
-    public void updateComment(Long id, String content) {
-        commentRepository.update(id, content);
     }
 
     @Transactional

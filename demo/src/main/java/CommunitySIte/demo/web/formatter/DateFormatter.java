@@ -22,7 +22,6 @@ public class DateFormatter implements Formatter<LocalDateTime> {
 
     @Override
     public String print(LocalDateTime object, Locale locale) {
-        log.info("print object={}", object);
         return object.format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
     }
 }

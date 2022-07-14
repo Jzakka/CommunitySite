@@ -22,23 +22,17 @@ public class InitDataConstructor {
 
     @PostConstruct
     public void initUser() {
-        Users user1 = new Users();
-        user1.setUserName("Admin");
-        user1.setLoginId("admin");
-        user1.setPassword("admin");
-        user1.setUserType(UserType.ADMIN);
 
-        Users user2 = new Users();
+        /*Users user2 = new Users();
         user2.setUserName("user1");
         user2.setLoginId("user1");
         user2.setPassword("1234");
-        user2.setUserType(UserType.MEMBER);
+        user2.setUserType(UserType.MEMBER);*/
 
-        userService.join(user1);
-        userService.join(user2);
+//        userService.join(user2);
     }
 
-    @PostConstruct
+    /*@PostConstruct
     public void initForum(){
         Forum forum = new Forum();
         forum.setForumName("forum1");
@@ -70,5 +64,5 @@ public class InitDataConstructor {
             }
         }
 
-    }
+    }*/
 }

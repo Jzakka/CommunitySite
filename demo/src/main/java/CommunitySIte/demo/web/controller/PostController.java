@@ -38,6 +38,11 @@ public class PostController {
     private final ForumService forumService;
     private final FileStore fileStore;
 
+    @ModelAttribute("forumId")
+    public Long forumId(@PathVariable Long forumId) {
+        return forumId;
+    }
+
     @ModelAttribute("postType")
     public PostType[] postType() {
         return PostType.values();
@@ -100,14 +105,7 @@ public class PostController {
         return "redirect:/forum/{forumId}";
     }
 
-    /**
-     * 이미지 가능하게 변경 필요
-     * @param postId
-     * @param user
-     * @param postForm
-     * @param bindingResult
-     * @return
-     */
+
     @PostMapping("/{postId}/update")
     public String update(@PathVariable Long postId,
                          @Login Users user,
@@ -173,7 +171,6 @@ public class PostController {
             postService.delete(postId);
             return "redirect:/forum/"+forumId;
         } else {
-            model.addAttribute("forumId", forumId);
             model.addAttribute("password", "");
             return "posts/enter-password";
         }
@@ -260,7 +257,7 @@ public class PostController {
     }
 
     //에러메시지 파일이 yml로 설정이 안된다는듯...
-    //일단은 생노가다로 defalut 메시지 설정
+    //일단은 defalut 메시지 설정
 
     @Data
     @NoArgsConstructor

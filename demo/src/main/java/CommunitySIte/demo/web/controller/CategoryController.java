@@ -5,6 +5,7 @@ import CommunitySIte.demo.exception.NotAuthorizedException;
 import CommunitySIte.demo.service.CategoryService;
 import CommunitySIte.demo.service.ForumService;
 import CommunitySIte.demo.web.argumentresolver.Login;
+import CommunitySIte.demo.web.controller.access.AccessibilityChecker;
 import CommunitySIte.demo.web.controller.page.Criteria;
 import CommunitySIte.demo.web.controller.page.PageCreator;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
+
+import static CommunitySIte.demo.web.controller.ForumController.*;
+import static CommunitySIte.demo.web.controller.access.AccessibilityChecker.*;
+import static CommunitySIte.demo.web.controller.access.AccessibilityChecker.isManager;
+import static CommunitySIte.demo.web.controller.page.PageCreator.*;
 
 @Slf4j
 @Controller
@@ -50,28 +56,19 @@ public class CategoryController {
                                       HttpServletRequest request,
                                       Model model,
                                       Criteria criteria){
-        criteria.setPage(page==null?1:page);
         Category category = categoryService.findWithForumAndPosts(categoryId);
-        //Forum forum = forumService.showForum(forumId);
-        //List<Post> posts = categoryService.showPostsByCategory(categoryId);
+        Integer postsCount = category.getPosts().size();
+        List<Category> categories = forumService.showCategories(forumId);
 
-        PageCreator pageCreator = new PageCreator();
-        pageCreator.setCriteria(criteria);
-        pageCreator.setTotalCount(category.getPosts().size());
-        log.info("pageCreator={}", pageCreator);
+        PageCreator pageCreator = newPageCreator(page, criteria, postsCount);
 
-        model.addAttribute("postForm",new PostController.PostFeedForm());
-        model.addAttribute("forum", category.getForum());
-        model.addAttribute("categories", forumService.showCategories(forumId));
+        modelSetForumInfo(model,category.getForum(),categories);
 
         List<Post> list = forumService.showPostsByPage(criteria, category.getForum(), category);
 
-        model.addAttribute("currentUrl", request.getRequestURI());
-        model.addAttribute("posts", list);
-        model.addAttribute("pageCreator", pageCreator);
+        paging(request,model,pageCreator,list);
 
-        boolean isManager = isManager(loginUser, category.getForum());
-        model.addAttribute("isManager", isManager);
+        checkIsManager(loginUser,model,category.getForum());
 
         return "forums/forum";
     }
@@ -91,7 +88,20 @@ public class CategoryController {
         return "categories/addCategoryForm";
     }
 
+    @GetMapping("/delete")
+    public String delete(@PathVariable Long forumId,
+                                  @RequestParam Long categoryId,
+                                  @Login Users loginUser) {
+        Forum forum = forumService.showForum(forumId);
 
+        boolean isManager = isManager(loginUser, forum);
+        if (!isManager) {
+            throw new NotAuthorizedException("매니저만 카테고리 삭제가능");
+        }
+
+        categoryService.deleteCategory(categoryId);
+        return "redirect:/forum/{forumId}";
+    }
 
     @PostMapping("/new")
     public String addCategory(@PathVariable Long forumId,
@@ -116,19 +126,6 @@ public class CategoryController {
         return "redirect:/forum/{forumId}";
     }
 
-
-    public static boolean isManager(Users loginUser, Forum forum) {
-        if(loginUser!=null&&loginUser.getUserType()==UserType.ADMIN) return true;
-        boolean isManager = false;
-        List<ForumManager> forumManagers = forum.getForumManagers();
-        for (ForumManager forumManager : forumManagers) {
-            if (forumManager.getUser().equals(loginUser)) {
-                isManager = true;
-                break;
-            }
-        }
-        return isManager;
-    }
 
     @Data
     @NoArgsConstructor

@@ -9,8 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static CommunitySIte.demo.domain.Post.*;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -33,14 +31,6 @@ public class PostService {
         Category category = categoryRepository.findOne(categoryId);
         Post post = Post.createPost(forum, title, imageFile, user, category, content);
         postRepository.save(post);
-    }
-
-    private Users createAnonymousUser(String username) {
-        Users anonymousUser = new Users();
-        anonymousUser.setUserName(username);
-        anonymousUser.setUserType(UserType.NONMEMBER);
-        userRepository.save(anonymousUser);
-        return anonymousUser;
     }
 
     @Transactional(readOnly = true)

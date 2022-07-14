@@ -1,8 +1,12 @@
 package CommunitySIte.demo.web.controller.page;
 
-import lombok.Data;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
-@Data
+@Slf4j
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PageCreator {
 
     private Criteria criteria;
@@ -36,5 +40,15 @@ public class PageCreator {
 
         prev = start == 1 ? false : true;
         next = end * criteria.getPerPageNum() < totalCount ? true : false;
+    }
+
+    public static PageCreator newPageCreator(Integer page, Criteria criteria, Integer postsCount) {
+        criteria.setPage(page == null ? 1 : page);
+        log.info("criteria.page={}", criteria.getPage());
+
+        PageCreator pageCreator = new PageCreator();
+        pageCreator.setCriteria(criteria);
+        pageCreator.setTotalCount(postsCount);
+        return pageCreator;
     }
 }

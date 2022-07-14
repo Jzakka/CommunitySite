@@ -34,6 +34,10 @@ public class CategoryService {
         return categoryRepository.findOne(categoryId);
     }
 
+    public void deleteCategory(Long categoryId) {
+        categoryRepository.delete(categoryId);
+    }
+
     public Category findWithForumAndPosts(Long categoryId) {
         return categoryRepository.findWithForumAndPosts(categoryId);
     }

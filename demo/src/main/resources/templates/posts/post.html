@@ -30,15 +30,15 @@
             <div><p class="fw-normal" nl2br:text="${post.getContent()}"></p></div>
         </div>
     </div>
-    <div class="row justify-content-end" th:if="${(post.user==null || post.user.equals(user))}">
+    <div class="row justify-content-end">
         <div class="col-sm-1">
-            <a class="text-decoration-none"
+            <a class="text-decoration-none" th:if="${(isPostAnonymous || isUserWriter)}"
                th:href="@{/forum/{forumId}/post/{id}/update(id=${postId}, forumId=${forumId})}">
                 <p class="fw-lighter">수정</p>
             </a>
         </div>
         <div class="col-sm-1">
-            <a class="text-decoration-none"
+            <a class="text-decoration-none" th:if="${(isPostAnonymous || isUserWriter || isUserManager)}"
                th:href="@{/forum/{forumId}/post/{postId}/delete(forumId=${forumId}, postId=${postId})}">
                 <p class="fw-lighter">삭제</p>
             </a>

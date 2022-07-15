@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import static CommunitySIte.demo.web.controller.ForumController.modelSetForumInfo;
+import static CommunitySIte.demo.web.controller.access.AccessibilityChecker.isManager;
 
 @Slf4j
 @Controller
@@ -195,12 +196,19 @@ public class PostController {
         Post post = postService.findPostAndForum(postId);
         Long forumId = post.getForum().getId();
         boolean accessible = AccessibilityChecker.accessible(user, post);
-        if (!accessible) {
+        boolean isManager = isManager(user, post.getForum());
+        if (!accessible&&!isManager) {
             throw new NotAuthorizedException("인증되지 않은 사용자 접근입니다.");
         }
 
-        if (post.getPostType() == PostType.NORMAL) {
-            postService.delete(postId);
+        if (isManager) {
+            boolean isFileDeleted = postService.delete(postId);
+            log.info("UploadedFile deleted?:{}",isFileDeleted);
+            return "redirect:/forum/"+forumId;
+        }
+        else if (post.getPostType() == PostType.NORMAL) {
+            boolean isFileDeleted = postService.delete(postId);
+            log.info("UploadedFile deleted?:{}",isFileDeleted);
             return "redirect:/forum/"+forumId;
         } else {
             model.addAttribute("password", "");
@@ -216,7 +224,8 @@ public class PostController {
         Post post = postService.findPostAndForum(postId);
         Long forumId = post.getForum().getId();
         boolean accessible = AccessibilityChecker.accessible(user, post);
-        if (!accessible) {
+        boolean isManager = isManager(user, post.getForum());
+        if (!accessible&&!isManager) {
             throw new NotAuthorizedException("인증되지 않은 사용자 접근입니다.");
         }
         if(!StringUtils.hasText(password)||(post.getPassword() != null && !post.getPassword().equals(password))){
@@ -230,7 +239,8 @@ public class PostController {
             return "posts/enter-password";
         }
 
-        postService.delete(postId);
+        boolean isFileDeleted= postService.delete(postId);
+        log.info("UploadedFile deleted?:{}", isFileDeleted);
         return "redirect:/forum/"+forumId;
     }
 
@@ -248,6 +258,11 @@ public class PostController {
         model.addAttribute("forumName", post.getForum().getForumName());
         model.addAttribute("post", post);
         model.addAttribute("commentForm", new CommentController.CommentForm());
+
+        //게시글 수정 삭제 버튼이 사용자 타입, 게시글타입에 따라 보여야할지 말아야 할지 결정
+        model.addAttribute("isPostAnonymous", post.getPostType() == PostType.ANONYMOUS);
+        model.addAttribute("isUserWriter", (user != null && post.getPostType() == PostType.NORMAL &&post.getUser().equals(user)));
+        model.addAttribute("isUserManager", (isManager(user, post.getForum())));
 
         return "posts/post";
     }

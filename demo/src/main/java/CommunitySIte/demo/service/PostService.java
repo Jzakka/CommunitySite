@@ -1,19 +1,21 @@
 package CommunitySIte.demo.service;
 
 import CommunitySIte.demo.domain.*;
+import CommunitySIte.demo.domain.file.FileStore;
 import CommunitySIte.demo.domain.file.UploadFile;
 import CommunitySIte.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.util.List;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class PostService {
-    private final UserRepository userRepository;
+    private final FileStore fileStore;
     private final ForumRepository forumRepository;
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
@@ -86,8 +88,18 @@ public class PostService {
         return postRepository.findByPattern(pattern);
     }
 
-    public void delete(Long id) {
-        postRepository.delete(id);
+    public boolean delete(Long id) {
+        boolean isFileDeleted = false;
+        try {
+            String storeFileName = postRepository.findOne(id).getImageFile().getStoreFileName();
+            File file = new File(fileStore.getFullPath(storeFileName));
+            isFileDeleted = file.delete();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }finally {
+            postRepository.delete(id);
+        }
+        return isFileDeleted;
     }
 
     public Post showPostWithComment(Long postId) {

@@ -100,7 +100,10 @@ public class ForumController {
 
 
     @GetMapping("/{forumId}/manager")
-    public String managerForm(@ModelAttribute("managerForm") ManagerForm managerForm) {
+    public String managerForm(@ModelAttribute("managerForm") ManagerForm managerForm,
+                              @PathVariable Long forumId,
+                              Model model) {
+        model.addAttribute("forumId", forumId);
         return "forums/manager-form";
     }
 

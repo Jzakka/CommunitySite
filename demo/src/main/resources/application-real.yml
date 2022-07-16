@@ -2,7 +2,8 @@ server:
   port: 8080
 
 spring:
-  datasource: real-db
+  profiles:
+    include: real-db
 
   jpa:
     properties:

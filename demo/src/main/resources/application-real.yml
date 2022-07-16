@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    include: real-db
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDB106Dialect
+
+  session:
+    store-type: jdbc

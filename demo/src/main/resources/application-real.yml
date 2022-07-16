@@ -2,15 +2,14 @@ server:
   port: 8080
 
 spring:
-  profiles:
-    include: real-db
+  datasource: real-db
 
   jpa:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MariaDB106Dialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
 
   session:
     store-type: jdbc

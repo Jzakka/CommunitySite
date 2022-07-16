@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'CommunitySIte'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.2-SNAPSHOT-' + new Date().format("yyyyMMddHHmmss")
 sourceCompatibility = '11'
 
 configurations {

@@ -1,0 +1,8 @@
+spring:
+  cache:
+    type: none
+  profiles:
+    active: dev
+
+file:
+  dir: /Users/Projects/file/

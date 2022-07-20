@@ -62,7 +62,7 @@ public class CommentController {
 
         if (comment.getPostType() == PostType.NORMAL) {
             commentService.delete(commentId);
-            return "redirect:/forum/{forumId}";
+            return "redirect:/forum/{forumId}/post/{postId}";
         } else {
             model.addAttribute("password", "");
             return "posts/enter-password";

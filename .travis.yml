@@ -37,7 +37,20 @@ deploy:
     on:
       repo: Jzakka/CommunitySite
       branch: main
-
+  - provider: codedeploy
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
+    bucket: communitysite-deploy
+    key: communitysite.zip
+    bundle_type: zip
+    application: springboot-web
+    deployment_group: springboot-web-group
+    region: ap-northeast-2
+    wait-until-deployed: true
+    on:
+      repo: Jzakka/CommunitySite
+      branch: main
+  
 notifications:
   email:
     recipients:

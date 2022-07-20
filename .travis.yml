@@ -1,4 +1,5 @@
 before_install:
+  - cd demo
   - pwd
   - ls -la
   - chmod +x ./gradlew

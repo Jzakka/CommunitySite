@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotBlank;
 
+import static CommunitySIte.demo.web.controller.access.AccessibilityChecker.isManager;
+
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -118,6 +120,12 @@ public class CommentController {
             model.addAttribute("forumId", forumId);
             model.addAttribute("forumName", post.getForum().getForumName());
             model.addAttribute("post", post);
+            model.addAttribute("commentForm",commentForm);
+
+            //게시글 수정 삭제 버튼이 사용자 타입, 게시글타입에 따라 보여야할지 말아야 할지 결정
+            model.addAttribute("isPostAnonymous", post.getPostType() == PostType.ANONYMOUS);
+            model.addAttribute("isUserWriter", (loginUser != null && post.getPostType() == PostType.NORMAL &&post.getUser().equals(loginUser)));
+            model.addAttribute("isUserManager", (isManager(loginUser, post.getForum())));
 
             return "posts/post";
         }

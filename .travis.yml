@@ -33,6 +33,7 @@ deploy:
     skip_cleanup: true
     acl: public_read
     wait-until-deployed: true
+    local_dir: deploy
     on:
       repo: Jzakka/CommunitySite
       branch: main

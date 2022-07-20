@@ -1,6 +1,6 @@
 before_install:
   - pwd
-  - ls - la
+  - ls -la
   - chmod +x ./gradlew
 
 language: java

@@ -5,6 +5,7 @@ before_install:
   - chmod +x ./gradlew
 
 before deploy:
+  - cd ..
   - zip -r communitysite *
   - mkdir -p deploy
   - mv communitysite.zip deploy/communitysite.zip

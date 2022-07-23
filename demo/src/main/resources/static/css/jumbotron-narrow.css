@@ -32,6 +32,7 @@ body {
 @media (min-width: 768px) {
     .container {
         max-width: 530px;
+        overflow: hidden;
     }
 }
 .container-narrow > hr {
@@ -49,6 +50,11 @@ body {
 /* Supporting marketing content */
 .marketing {
     margin: 40px 0;
+}
+img {
+    max-width: 500px;
+    height: auto;
+    display: block;
 }
 .marketing p + h4 {
     margin-top: 28px;

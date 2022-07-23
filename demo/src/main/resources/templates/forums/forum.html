@@ -110,8 +110,7 @@
                         <p class="fw-lighter" th:text="${{post.lastModifiedDate.withNano(0)}}"></p>
                     </div>
                 </div>
-                <div th:if="${post.imageFile}"><img th:src="|/image/${post.imageFile.storeFileName}|" width="300"
-                                                    height="300"/></div>
+                <div th:if="${post.imageFile}"><img th:src="|/image/${post.imageFile.storeFileName}|" /></div>
                 <div class="row overflow-hidden"><p nl2br:text="${post.content}"></p>
                 </div>
             </div>

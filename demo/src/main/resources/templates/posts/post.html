@@ -23,8 +23,7 @@
                 </div>
                 <div class="col-sm-2"><p class="fw-light" th:text="${{post.getLastModifiedDate().withNano(0)}}"></p>
                 </div>
-                <div th:if="${post.imageFile}"><img th:src="|/image/${post.imageFile.storeFileName}|" width="300"
-                                                    height="300"/>
+                <div th:if="${post.imageFile}"><img th:src="|/image/${post.imageFile.storeFileName}|" />
                 </div>
             </div>
             <div><p class="fw-normal" nl2br:text="${post.getContent()}"></p></div>
